@@ -16,6 +16,10 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
   const [selectedStores, setSelectedStores] = useState<Set<'BE' | 'NL' | 'FR'>>(
     new Set(['BE', 'NL', 'FR'])
   );
+  const [expandedStores, setExpandedStores] = useState<Set<'BE' | 'NL' | 'FR'>>(
+    new Set(['BE', 'NL', 'FR']) // All expanded by default
+  );
+  const [showFullTable, setShowFullTable] = useState(false);
 
   // Get selected store names
   const [storeNames, setStoreNames] = useState<Record<'BE' | 'NL' | 'FR', string>>({
@@ -115,8 +119,19 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
     setSelectedStores(newSelected);
   };
 
+  const toggleStoreExpansion = (storeCode: 'BE' | 'NL' | 'FR') => {
+    const newExpanded = new Set(expandedStores);
+    if (newExpanded.has(storeCode)) {
+      newExpanded.delete(storeCode);
+    } else {
+      newExpanded.add(storeCode);
+    }
+    setExpandedStores(newExpanded);
+  };
+
   const exportToPDF = () => {
     const doc = new jsPDF();
+    const storeMap = { BE: 'belgium', NL: 'netherlands', FR: 'france' } as const;
 
     // Title
     doc.setFontSize(20);
@@ -129,47 +144,108 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
     doc.text(`Totaal Producten: ${analysis.totalProducts}`, 14, 35);
     doc.text(`Succesvol Opgehaald: ${analysis.successfullyFetched}`, 14, 42);
 
-    // Best Single Store
+    // Optimized Strategy Summary
     doc.setFontSize(14);
     doc.setTextColor(0, 88, 163);
-    doc.text('Beste Enkele Winkel Strategie', 14, 55);
+    doc.text('Geoptimaliseerde Winkelstrategie', 14, 55);
     doc.setFontSize(11);
     doc.setTextColor(0, 0, 0);
-    doc.text(`Winkel: ${analysis.singleStoreStrategy.best.storeName}`, 14, 63);
-    doc.text(`Totale Kosten: €${analysis.singleStoreStrategy.best.totalCost.toFixed(2)}`, 14, 70);
+    doc.text(`Totale Kosten: €${optimizedStrategy.totalCost.toFixed(2)}`, 14, 63);
+    doc.text(`Besparing t.o.v. enkel ${storeNames.BE}: €${optimizedStrategy.savings.toFixed(2)}`, 14, 70);
 
-    // Multi-Store Strategy
+    let currentY = 85;
+
+    // Shopping Lists Per Store
+    optimizedStrategy.breakdown.forEach((store, storeIndex) => {
+      // Check if we need a new page
+      if (currentY > 240) {
+        doc.addPage();
+        currentY = 20;
+      }
+
+      // Store Header
+      doc.setFontSize(14);
+      doc.setTextColor(0, 88, 163);
+      const storeFlag = countryFlags[store.store];
+      doc.text(`${storeFlag} ${store.storeName}`, 14, currentY);
+
+      doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
+      currentY += 7;
+      doc.text(`${store.productCount} producten • €${store.subtotal.toFixed(2)}`, 14, currentY);
+      currentY += 10;
+
+      // Store Products Table
+      const storeProducts = store.products.map(productId => {
+        const product = analysis.products.find(p => p.productId === productId);
+        if (!product) return null;
+
+        const productData = product.products[storeMap[store.store]];
+        const currentPrice = productData?.price;
+
+        // Check if cheapest
+        const allPrices = [
+          product.products.belgium?.price,
+          product.products.netherlands?.price,
+          product.products.france?.price
+        ].filter(p => p !== undefined) as number[];
+        const globalCheapest = Math.min(...allPrices);
+        const isCheapest = currentPrice === globalCheapest;
+
+        return [
+          product.productId,
+          productData?.name.substring(0, 35) || 'Onbekend',
+          `€${currentPrice?.toFixed(2) || '-'}`,
+          isCheapest ? '✓ Beste' : '⚠ Beschikbaar'
+        ];
+      }).filter(Boolean);
+
+      autoTable(doc, {
+        startY: currentY,
+        head: [['Code', 'Product', 'Prijs', 'Status']],
+        body: storeProducts as any,
+        theme: 'striped',
+        headStyles: { fillColor: [0, 88, 163], fontSize: 9 },
+        styles: { fontSize: 8, cellPadding: 2 },
+        columnStyles: {
+          0: { cellWidth: 25 },
+          1: { cellWidth: 'auto' },
+          2: { cellWidth: 25, halign: 'right' },
+          3: { cellWidth: 30, fontSize: 7 }
+        },
+        didDrawPage: (data) => {
+          currentY = data.cursor?.y || currentY;
+        }
+      });
+
+      // Subtotal row
+      currentY = (doc as any).lastAutoTable.finalY + 5;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Subtotaal: €${store.subtotal.toFixed(2)}`, 14, currentY);
+      doc.setFont('helvetica', 'normal');
+
+      currentY += 15;
+
+      // Add separator line between stores
+      if (storeIndex < optimizedStrategy.breakdown.length - 1) {
+        doc.setDrawColor(200, 200, 200);
+        doc.line(14, currentY - 5, 196, currentY - 5);
+      }
+    });
+
+    // Total on last page
+    if (currentY > 260) {
+      doc.addPage();
+      currentY = 20;
+    }
+
     doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
     doc.setTextColor(0, 88, 163);
-    doc.text('Meerdere Winkels Strategie', 14, 83);
-    doc.setFontSize(11);
-    doc.setTextColor(0, 0, 0);
-    doc.text(`Totale Kosten: €${analysis.multiStoreStrategy.totalCost.toFixed(2)}`, 14, 91);
-    doc.text(`Besparing: €${analysis.multiStoreStrategy.savings.toFixed(2)}`, 14, 98);
+    doc.text(`TOTAAL: €${optimizedStrategy.totalCost.toFixed(2)}`, 14, currentY);
 
-    // Products Table
-    const tableData = analysis.products.map((product) => {
-      const anyProduct = product.products.belgium || product.products.netherlands || product.products.france;
-      return [
-        product.productId,
-        anyProduct?.name.substring(0, 40) || 'N.v.t.',
-        product.products.belgium?.price?.toFixed(2) || '-',
-        product.products.netherlands?.price?.toFixed(2) || '-',
-        product.products.france?.price?.toFixed(2) || '-',
-        product.cheapest === 'BE' ? 'België' : product.cheapest === 'NL' ? 'Nederland' : product.cheapest === 'FR' ? 'Frankrijk' : '-',
-      ];
-    });
-
-    autoTable(doc, {
-      startY: 110,
-      head: [['Code', 'Product', 'BE (€)', 'NL (€)', 'FR (€)', 'Beste']],
-      body: tableData,
-      theme: 'striped',
-      headStyles: { fillColor: [0, 88, 163] }, // IKEA blue
-      styles: { fontSize: 8 },
-    });
-
-    doc.save('ikea-shopping-list-analysis.pdf');
+    doc.save('ikea-winkellijst.pdf');
   };
 
   const countryFlags = {
@@ -186,13 +262,13 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
         <div className="flex gap-2">
           <button
             onClick={exportToPDF}
-            className="px-4 py-2 bg-ikea-yellow text-gray-900 text-sm font-bold rounded hover:opacity-90 transition-all"
+            className="px-4 py-2.5 bg-ikea-yellow text-gray-900 text-sm font-bold border-2 border-black hover:bg-yellow-400 transition-colors"
           >
             📄 Exporteer PDF
           </button>
           <button
             onClick={onReset}
-            className="px-4 py-2 bg-gray-200 text-gray-900 text-sm font-bold rounded hover:bg-gray-300 transition-all"
+            className="px-4 py-2.5 bg-white text-gray-900 text-sm font-bold border-2 border-gray-900 hover:bg-gray-100 transition-colors"
           >
             ✕ Wissen
           </button>
@@ -200,7 +276,7 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
       </div>
 
       {/* Price Overview */}
-      <div className="bg-gradient-to-r from-ikea-blue to-blue-600 rounded-lg p-6 text-white">
+      <div className="bg-ikea-blue border-2 border-black p-6 text-white">
         <h3 className="text-lg font-bold mb-4">Prijsvergelijking Overzicht</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
@@ -238,7 +314,7 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
       </div>
 
       {/* Store Selection */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white border-2 border-gray-300 p-6">
         <h3 className="text-lg font-bold text-gray-900 mb-4">Selecteer Winkels om te Bezoeken</h3>
         <p className="text-sm text-gray-600 mb-4">
           Kies welke winkels je wilt bezoeken. We berekenen de beste winkelstrategie op basis van je selectie.
@@ -247,17 +323,17 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
           {analysis.singleStoreStrategy.all.map((store) => (
             <label
               key={store.storeCode}
-              className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+              className={`flex items-center gap-3 p-4 border-2 cursor-pointer transition-all ${
                 selectedStores.has(store.storeCode)
-                  ? 'border-ikea-blue bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
+                  ? 'border-black bg-blue-50'
+                  : 'border-gray-300 hover:border-gray-400'
               }`}
             >
               <input
                 type="checkbox"
                 checked={selectedStores.has(store.storeCode)}
                 onChange={() => handleStoreToggle(store.storeCode)}
-                className="w-5 h-5 text-ikea-blue border-gray-300 rounded focus:ring-ikea-blue"
+                className="w-5 h-5 text-ikea-blue border-2 border-gray-900"
               />
               <div className="flex-1">
                 <div className="flex items-center gap-2">
@@ -281,7 +357,7 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
         </div>
 
         {/* Availability Legend */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="bg-blue-50 border-2 border-ikea-blue p-4">
           <h4 className="text-sm font-bold text-gray-900 mb-2">Hoe we beschikbaarheid hanteren</h4>
           <ul className="text-xs text-gray-700 space-y-1">
             <li className="flex items-start gap-2">
@@ -301,22 +377,25 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
       </div>
 
       {/* Optimized Shopping Strategy */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div className="p-4 bg-gray-50 border-b border-gray-200">
+      <div className="bg-white border-2 border-gray-300 overflow-hidden">
+        <div className="p-4 bg-gray-50 border-b-2 border-gray-300">
           <h3 className="font-bold text-gray-900">Jouw Geoptimaliseerde Winkelstrategie</h3>
           <p className="text-xs text-gray-600 mt-1">
-            Op basis van je geselecteerde winkels, hier moet je elk item kopen voor de beste totaalprijs
+            Klik op een winkel om je winkellijst te zien
           </p>
         </div>
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y-2 divide-gray-300">
           {optimizedStrategy.breakdown.map((store) => {
-            // Calculate how many items are cheapest here vs available but not cheapest
+            const isExpanded = expandedStores.has(store.store);
+            const storeMap = { BE: 'belgium', NL: 'netherlands', FR: 'france' } as const;
+
+            // Get full product details for this store
             const storeProducts = store.products.map(productId => {
               const product = analysis.products.find(p => p.productId === productId);
               if (!product) return null;
 
-              const storeMap = { BE: 'belgium', NL: 'netherlands', FR: 'france' } as const;
               const currentPrice = product.products[storeMap[store.store]]?.price;
+              const productData = product.products[storeMap[store.store]];
 
               // Check if this is actually the cheapest among all stores (not just selected)
               const allPrices = [
@@ -328,29 +407,81 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
               const globalCheapest = Math.min(...allPrices);
               const isCheapestOverall = currentPrice === globalCheapest;
 
-              return { productId, isCheapestOverall, currentPrice, globalCheapest };
+              return {
+                productId,
+                name: productData?.name || 'Onbekend product',
+                price: currentPrice,
+                isCheapestOverall
+              };
             }).filter(Boolean);
 
             const cheapestHere = storeProducts.filter(p => p?.isCheapestOverall).length;
             const notCheapestButAvailable = storeProducts.length - cheapestHere;
 
             return (
-              <div key={store.store} className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{countryFlags[store.store]}</span>
-                    <div>
-                      <div className="font-bold text-gray-900">{store.storeName}</div>
-                      <div className="text-xs text-gray-600">{store.productCount} producten hier te kopen</div>
-                      {notCheapestButAvailable > 0 && (
-                        <div className="text-xs text-orange-600 mt-1">
-                          {notCheapestButAvailable} item{notCheapestButAvailable !== 1 ? 's' : ''} gekozen omdat niet beschikbaar elders
+              <div key={store.store}>
+                <button
+                  onClick={() => toggleStoreExpansion(store.store)}
+                  className="w-full p-4 hover:bg-gray-50 transition-colors text-left"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 flex-1">
+                      <span className="text-2xl">{countryFlags[store.store]}</span>
+                      <div className="flex-1">
+                        <div className="font-bold text-gray-900">{store.storeName}</div>
+                        <div className="text-xs text-gray-600">{store.productCount} producten • €{store.subtotal.toFixed(2)}</div>
+                        {notCheapestButAvailable > 0 && (
+                          <div className="text-xs text-orange-600 mt-1">
+                            {notCheapestButAvailable} item{notCheapestButAvailable !== 1 ? 's' : ''} gekozen omdat niet beschikbaar elders
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <svg
+                      className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </button>
+
+                {isExpanded && (
+                  <div className="px-4 pb-4 border-t-2 border-gray-200">
+                    <div className="mt-4 space-y-2">
+                      {storeProducts.map((item) => item && (
+                        <div
+                          key={item.productId}
+                          className={`p-3 border-2 ${item.isCheapestOverall ? 'bg-ikea-yellow-light border-ikea-yellow' : 'bg-gray-50 border-gray-300'}`}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-gray-900 text-sm">{item.name}</div>
+                              <div className="text-xs text-gray-600 font-mono mt-1">{item.productId}</div>
+                              {!item.isCheapestOverall && (
+                                <div className="text-xs text-orange-600 mt-1">
+                                  ⚠️ Niet de goedkoopste, maar hier beschikbaar
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex flex-col items-end flex-shrink-0">
+                              <div className="text-lg font-bold text-gray-900">€{item.price?.toFixed(2)}</div>
+                              {item.isCheapestOverall && (
+                                <div className="text-xs text-gray-600 mt-1">✓ Beste prijs</div>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      )}
+                      ))}
+                    </div>
+                    <div className="mt-4 pt-3 border-t-2 border-gray-300 flex justify-between items-center">
+                      <span className="font-bold text-gray-900">Subtotaal {store.storeName}</span>
+                      <span className="text-xl font-bold text-gray-900">€{store.subtotal.toFixed(2)}</span>
                     </div>
                   </div>
-                  <div className="text-xl font-bold text-gray-900">€{store.subtotal.toFixed(2)}</div>
-                </div>
+                )}
               </div>
             );
           })}
@@ -359,10 +490,30 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
 
 
       {/* Products Table */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div className="p-4 bg-gray-50 border-b border-gray-200">
-          <h3 className="font-bold text-gray-900">Alle Producten ({analysis.products.length})</h3>
-        </div>
+      <div className="bg-white border-2 border-gray-300 overflow-hidden">
+        <button
+          onClick={() => setShowFullTable(!showFullTable)}
+          className={`w-full p-4 bg-gray-50 hover:bg-gray-100 transition-colors text-left ${showFullTable ? 'border-b-2 border-gray-300' : ''}`}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-bold text-gray-900">Volledige Prijsvergelijking ({analysis.products.length} producten)</h3>
+              <p className="text-xs text-gray-600 mt-1">
+                {showFullTable ? 'Klik om te verbergen' : 'Klik om alle prijzen per land te zien'}
+              </p>
+            </div>
+            <svg
+              className={`w-5 h-5 text-gray-400 transition-transform ${showFullTable ? 'rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </button>
+        {showFullTable && (
+          <>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
@@ -409,7 +560,7 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
                     </td>
                     <td className="px-4 py-3 text-center">
                       {product.cheapest && (
-                        <span className="inline-block px-2 py-1 bg-ikea-yellow text-gray-900 text-xs font-bold rounded">
+                        <span className="inline-block px-2 py-1 bg-ikea-yellow text-gray-900 text-xs font-bold border border-black">
                           {product.cheapest}
                         </span>
                       )}
@@ -420,6 +571,8 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
             </tbody>
           </table>
         </div>
+          </>
+        )}
       </div>
     </div>
   );

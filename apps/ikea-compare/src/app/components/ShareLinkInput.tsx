@@ -53,7 +53,7 @@ export default function ShareLinkInput({ onSubmit, isLoading }: ShareLinkInputPr
               setError('');
             }}
             placeholder="https://www.ikea.com/be/nl/favourites/receive-share/..."
-            className="w-full px-4 py-3 text-sm border-2 border-gray-300 rounded focus:ring-2 focus:border-gray-900 focus:outline-none transition-colors"
+            className="w-full px-4 py-3 text-sm border-2 border-gray-900 focus:outline-none focus:border-ikea-blue transition-colors"
             disabled={isLoading}
           />
           {error && (
@@ -64,7 +64,7 @@ export default function ShareLinkInput({ onSubmit, isLoading }: ShareLinkInputPr
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full px-6 py-3 bg-ikea-blue text-white text-base font-bold rounded hover:opacity-90 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all"
+          className="w-full px-6 py-3 bg-black text-white text-base font-bold hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
         >
           {isLoading ? 'Verwerken...' : 'Vergelijk Prijzen'}
         </button>

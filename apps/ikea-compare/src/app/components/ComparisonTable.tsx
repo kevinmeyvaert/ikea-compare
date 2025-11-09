@@ -23,7 +23,7 @@ function CountryCard({ country, countryCode, product, isCheapest }: CountryCardP
 
   if (!product) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6 border-2 border-gray-200">
+      <div className="bg-white p-6 border-2 border-gray-300">
         <div className="text-center">
           <div className="text-4xl mb-2">{countryFlags[countryCode]}</div>
           <h3 className="text-xl font-semibold mb-2">{country}</h3>
@@ -38,17 +38,17 @@ function CountryCard({ country, countryCode, product, isCheapest }: CountryCardP
 
   return (
     <div
-      className={`bg-white rounded-lg shadow-sm p-6 border transition-all ${
+      className={`bg-white p-6 border-2 transition-all ${
         isCheapest
-          ? 'border-2 border-ikea-blue'
-          : 'border border-gray-200'
+          ? 'border-black'
+          : 'border-gray-300'
       }`}
     >
       <div className="text-center mb-4">
         <div className="text-4xl mb-2">{countryFlags[countryCode]}</div>
         <h3 className="text-xl font-bold">{displayName}</h3>
         {isCheapest && (
-          <div className="mt-2 inline-block bg-ikea-yellow text-gray-900 px-4 py-1 rounded-full text-sm font-bold">
+          <div className="mt-2 inline-block bg-ikea-yellow text-gray-900 px-4 py-1 border-2 border-black text-sm font-bold">
             ✓ Beste Prijs
           </div>
         )}
@@ -84,7 +84,7 @@ function CountryCard({ country, countryCode, product, isCheapest }: CountryCardP
 
               {/* Restock information */}
               {product.storeAvailability.cashCarry.restockDate && (
-                <div className="text-xs text-gray-600 bg-blue-50 p-2 rounded">
+                <div className="text-xs text-gray-600 bg-blue-50 p-2 border border-gray-300">
                   📦 Nieuwe voorraad verwacht: {new Date(product.storeAvailability.cashCarry.restockDate).toLocaleDateString('nl-BE')}
                   {product.storeAvailability.cashCarry.restockQuantity && (
                     <span> ({product.storeAvailability.cashCarry.restockQuantity} stuks)</span>
@@ -135,7 +135,7 @@ export default function ComparisonTable({ result }: ComparisonTableProps) {
   return (
     <div className="w-full max-w-6xl mx-auto space-y-8">
       {/* Product Header */}
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white border-2 border-gray-300 p-6">
         <div className="flex flex-col md:flex-row gap-6 items-center">
           {anyProduct.imageUrl && (
             <div className="flex-shrink-0">
@@ -185,7 +185,7 @@ export default function ComparisonTable({ result }: ComparisonTableProps) {
 
       {/* Price Difference Summary */}
       {cheapest && cheapest.length > 0 && (
-        <div className="rounded-lg p-4 border-2 bg-ikea-yellow-light border-ikea-yellow">
+        <div className="p-4 border-2 bg-ikea-yellow-light border-black">
           <p className="text-center text-sm text-gray-900">
             <strong>Beste prijs:</strong>{' '}
             {cheapest.map((code, idx) => {

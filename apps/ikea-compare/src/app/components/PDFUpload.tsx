@@ -80,10 +80,10 @@ export default function PDFUpload({ onUploadSuccess, isLoading, setIsLoading }: 
       </div>
 
       <div
-        className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+        className={`border-2 border-dashed p-6 text-center transition-colors ${
           isDragging
-            ? 'border-ikea-blue bg-blue-50'
-            : 'border-gray-300 hover:border-gray-400'
+            ? 'border-black bg-blue-50'
+            : 'border-gray-900 hover:border-black'
         }`}
         onDrop={handleDrop}
         onDragOver={handleDragOver}

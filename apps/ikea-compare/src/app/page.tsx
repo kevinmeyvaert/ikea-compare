@@ -217,35 +217,44 @@ function IndexContent() {
             </div>
 
             {/* Mode Toggle */}
-            <div className="mb-6 grid grid-cols-3 gap-2">
+            <div className="mb-6 flex gap-3">
               <button
                 onClick={() => setMode('single')}
-                className={`px-3 py-2 text-sm font-bold rounded transition-all ${
+                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-2 transition-colors ${
                   mode === 'single'
-                    ? 'bg-ikea-blue text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    ? 'bg-black text-white border-black'
+                    : 'bg-white text-gray-900 border-gray-900 hover:bg-gray-50'
                 }`}
               >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
                 Enkel Product
               </button>
               <button
                 onClick={() => setMode('share')}
-                className={`px-3 py-2 text-sm font-bold rounded transition-all ${
+                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-2 transition-colors ${
                   mode === 'share'
-                    ? 'bg-ikea-blue text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    ? 'bg-black text-white border-black'
+                    : 'bg-white text-gray-900 border-gray-900 hover:bg-gray-50'
                 }`}
               >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
                 Share Link
               </button>
               <button
                 onClick={() => setMode('list')}
-                className={`px-3 py-2 text-sm font-bold rounded transition-all ${
+                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-2 transition-colors ${
                   mode === 'list'
-                    ? 'bg-ikea-blue text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    ? 'bg-black text-white border-black'
+                    : 'bg-white text-gray-900 border-gray-900 hover:bg-gray-50'
                 }`}
               >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
                 PDF Upload
               </button>
             </div>
@@ -302,7 +311,7 @@ function IndexContent() {
 
             {/* Error State */}
             {error && !loading && (
-              <div className="max-w-2xl mx-auto bg-red-50 border border-red-200 rounded-lg p-6">
+              <div className="max-w-2xl mx-auto bg-red-50 border-2 border-red-600 p-6">
                 <div className="flex items-center gap-3">
                   <svg
                     className="w-6 h-6 text-red-600 flex-shrink-0"
@@ -373,20 +382,20 @@ function IndexContent() {
 
                 {/* Share Link Instructions */}
                 {mode === 'share' && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                  <div className="bg-blue-50 border-2 border-ikea-blue p-6">
                     <h3 className="text-lg font-bold text-gray-900 mb-4">Hoe krijg je een share link?</h3>
                     <ol className="text-sm text-gray-700 space-y-3 list-decimal list-inside">
                       <li>Ga naar de <strong>IKEA website</strong> en voeg producten toe aan je winkelwagen</li>
                       <li>Open je <strong>winkelwagen</strong></li>
-                      <li>Klik op de <strong>"Deel"</strong> of <strong>"Share"</strong> knop</li>
+                      <li>Klik op de <strong>&ldquo;Deel&rdquo;</strong> of <strong>&ldquo;Share&rdquo;</strong> knop</li>
                       <li>Kopieer de gegenereerde share link</li>
-                      <li>Plak de link in het invoerveld links en klik op <strong>"Vergelijk Prijzen"</strong></li>
+                      <li>Plak de link in het invoerveld links en klik op <strong>&ldquo;Vergelijk Prijzen&rdquo;</strong></li>
                     </ol>
-                    <div className="mt-6 pt-4 border-t border-blue-300">
+                    <div className="mt-6 pt-4 border-t border-gray-300">
                       <p className="text-sm text-gray-700 font-semibold mb-2">
                         Voorbeeld link:
                       </p>
-                      <code className="block text-xs bg-white px-4 py-3 rounded border border-blue-200 break-all">
+                      <code className="block text-xs bg-white px-4 py-3 border-2 border-gray-300 break-all">
                         https://www.ikea.com/be/nl/favourites/receive-share/69505955:2,60275812:3
                       </code>
                       <p className="text-xs text-gray-600 mt-2">

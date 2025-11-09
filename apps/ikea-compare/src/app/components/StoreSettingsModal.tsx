@@ -61,9 +61,9 @@ export default function StoreSettingsModal({ isOpen, onClose, onStoreChange }: S
 
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div className="bg-white border-2 border-black max-w-md w-full max-h-[90vh] overflow-y-auto">
           {/* Header */}
-          <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+          <div className="sticky top-0 bg-white border-b-2 border-gray-300 px-6 py-4 flex items-center justify-between">
             <h2 className="text-xl font-bold text-gray-900">Winkelinstellingen</h2>
             <button
               onClick={onClose}
@@ -106,7 +106,7 @@ export default function StoreSettingsModal({ isOpen, onClose, onStoreChange }: S
                   <span className="text-lg mr-1">{countryFlags.NL}</span>
                   Nederland
                 </label>
-                <div className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded cursor-not-allowed opacity-75">
+                <div className="w-full px-3 py-2 bg-gray-100 border-2 border-gray-300 cursor-not-allowed opacity-75">
                   <div className="text-sm font-medium text-gray-900">IKEA Breda</div>
                   <div className="text-xs text-gray-600">Breda</div>
                 </div>
@@ -118,7 +118,7 @@ export default function StoreSettingsModal({ isOpen, onClose, onStoreChange }: S
                   <span className="text-lg mr-1">{countryFlags.FR}</span>
                   Frankrijk
                 </label>
-                <div className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded cursor-not-allowed opacity-75">
+                <div className="w-full px-3 py-2 bg-gray-100 border-2 border-gray-300 cursor-not-allowed opacity-75">
                   <div className="text-sm font-medium text-gray-900">IKEA Lille</div>
                   <div className="text-xs text-gray-600">Lille</div>
                 </div>
@@ -127,10 +127,10 @@ export default function StoreSettingsModal({ isOpen, onClose, onStoreChange }: S
           </div>
 
           {/* Footer */}
-          <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4">
+          <div className="sticky bottom-0 bg-gray-50 border-t-2 border-gray-300 px-6 py-4">
             <button
               onClick={onClose}
-              className="w-full px-4 py-2 bg-ikea-blue text-white font-bold rounded hover:opacity-90 transition-all"
+              className="w-full px-4 py-3 bg-black text-white font-bold hover:bg-gray-800 transition-colors"
             >
               Klaar
             </button>
