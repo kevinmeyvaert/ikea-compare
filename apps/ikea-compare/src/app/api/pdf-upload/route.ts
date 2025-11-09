@@ -116,14 +116,15 @@ export async function POST(request: NextRequest) {
 
         const productData: ProductComparisonResult = await response.json();
 
+        const cheapestCountry = productData.cheapest?.[0] || null;
         uniqueProducts.set(productId, {
           productId,
           products: productData.products,
-          cheapest: productData.cheapest,
-          cheapestPrice: productData.cheapest
+          cheapest: cheapestCountry,
+          cheapestPrice: cheapestCountry
             ? productData.products[
-                productData.cheapest === 'BE' ? 'belgium'
-                : productData.cheapest === 'NL' ? 'netherlands'
+                cheapestCountry === 'BE' ? 'belgium'
+                : cheapestCountry === 'NL' ? 'netherlands'
                 : 'france'
               ]?.price || null
             : null,

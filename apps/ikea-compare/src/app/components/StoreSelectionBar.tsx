@@ -11,8 +11,8 @@ interface StoreSelectionBarProps {
 
 export default function StoreSelectionBar({ onStoreChange }: StoreSelectionBarProps) {
   const [belgiumStore, setBelgiumStore] = useState<IkeaStore | null>(null);
-  const [netherlandsStore, setNetherlandsStore] = useState<IkeaStore | null>(null);
-  const [franceStore, setFranceStore] = useState<IkeaStore | null>(null);
+  const [_netherlandsStore, setNetherlandsStore] = useState<IkeaStore | null>(null);
+  const [_franceStore, setFranceStore] = useState<IkeaStore | null>(null);
 
   // Load saved preferences on mount, with defaults
   useEffect(() => {

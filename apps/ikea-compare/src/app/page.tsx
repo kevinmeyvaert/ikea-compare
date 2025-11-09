@@ -10,7 +10,7 @@ import StoreSettingsModal from './components/StoreSettingsModal';
 import PDFUpload from './components/PDFUpload';
 import ShareLinkInput from './components/ShareLinkInput';
 import ShoppingListAnalysis from './components/ShoppingListAnalysis';
-import { ProductComparisonResult, ProductData } from '../lib/scrapers/types';
+import { ProductComparisonResult } from '../lib/scrapers/types';
 import { ShoppingListAnalysis as ShoppingListAnalysisType } from '../lib/shopping-list/types';
 import { getSelectedStore } from '../lib/stores/store-manager';
 

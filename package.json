@@ -2,7 +2,11 @@
   "name": "@ikea-compare/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "build": "nx build ikea-compare",
+    "dev": "nx dev ikea-compare",
+    "start": "nx start ikea-compare"
+  },
   "private": true,
   "dependencies": {
     "next": "~15.2.4",
@@ -21,7 +25,7 @@
     "@nx/workspace": "22.0.2",
     "@swc-node/register": "~1.9.1",
     "@swc/cli": "~0.6.0",
-    "@swc/core": "~1.5.7",
+    "@swc/core": "~1.13.3",
     "@swc/helpers": "~0.5.11",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

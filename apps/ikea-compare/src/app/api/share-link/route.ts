@@ -49,16 +49,17 @@ export async function POST(request: NextRequest) {
         // Count how many times this product appears in the share link
         const quantity = productCodes.filter(id => id === productId).length;
 
+        const cheapestCountry = productData.cheapest?.[0] || null;
         // Add one entry per quantity
         for (let i = 0; i < quantity; i++) {
           products.push({
             productId,
             products: productData.products,
-            cheapest: productData.cheapest,
-            cheapestPrice: productData.cheapest
+            cheapest: cheapestCountry,
+            cheapestPrice: cheapestCountry
               ? productData.products[
-                  productData.cheapest === 'BE' ? 'belgium'
-                  : productData.cheapest === 'NL' ? 'netherlands'
+                  cheapestCountry === 'BE' ? 'belgium'
+                  : cheapestCountry === 'NL' ? 'netherlands'
                   : 'france'
                 ]?.price || null
               : null,
