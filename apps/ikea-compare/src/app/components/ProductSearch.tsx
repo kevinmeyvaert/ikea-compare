@@ -67,7 +67,7 @@ export default function ProductSearch({ onSearch, isLoading }: ProductSearchProp
             disabled={isLoading}
             className="w-full mt-3 px-6 py-3 bg-black text-white text-base font-bold hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
           >
-            {isLoading ? 'Prijzen ophalen...' : 'Vergelijk Prijzen'}
+            {isLoading ? 'Prijzen ophalen...' : 'Vergelijk prijzen'}
           </button>
         </div>
         <p className="text-xs text-gray-600">

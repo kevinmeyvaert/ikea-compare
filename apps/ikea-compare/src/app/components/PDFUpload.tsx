@@ -119,7 +119,7 @@ export default function PDFUpload({ onUploadSuccess, isLoading, setIsLoading }: 
               disabled={isLoading}
               className="text-ikea-blue hover:underline font-medium text-sm disabled:opacity-50"
             >
-              {isLoading ? 'Verwerken...' : 'Upload PDF'}
+              {isLoading ? 'Verwerken...' : 'Upload pdf'}
             </button>
             <p className="text-xs text-gray-600 mt-1">of sleep en laat los</p>
           </div>
@@ -131,7 +131,7 @@ export default function PDFUpload({ onUploadSuccess, isLoading, setIsLoading }: 
       )}
 
       <p className="mt-3 text-xs text-gray-600">
-        Deze parser is ontworpen voor PDF's uit de IKEA keukenplanner. PDF moet productcodes bevatten (8 cijfers).
+        Deze parser is ontworpen voor pdf's uit de IKEA keukenplanner. Pdf moet productcodes bevatten (8 cijfers).
       </p>
     </div>
   );

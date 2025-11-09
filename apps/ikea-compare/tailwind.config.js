@@ -22,6 +22,8 @@ module.exports = {
         'ikea-blue': '#0058A3',
         'ikea-yellow': '#FFDB00',
         'ikea-yellow-light': '#FFF9E6',
+        'ikea-pink': '#E1004E',
+        'ikea-pink-light': '#FFF0F5',
       },
     },
   },

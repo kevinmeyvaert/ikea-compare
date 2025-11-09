@@ -33,7 +33,7 @@ export default function ShareLinkInput({ onSubmit, isLoading }: ShareLinkInputPr
   return (
     <div className="w-full">
       <div className="mb-4">
-        <h2 className="text-sm font-bold text-gray-900 mb-1">IKEA Share Link</h2>
+        <h2 className="text-sm font-bold text-gray-900 mb-1">IKEA share link</h2>
         <p className="text-xs text-gray-700">
           Plak je IKEA winkelwagen share link
         </p>
@@ -42,7 +42,7 @@ export default function ShareLinkInput({ onSubmit, isLoading }: ShareLinkInputPr
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="shareLink" className="block text-xs font-bold text-gray-700 mb-2">
-            Share Link
+            Share link
           </label>
           <input
             id="shareLink"
@@ -66,7 +66,7 @@ export default function ShareLinkInput({ onSubmit, isLoading }: ShareLinkInputPr
           disabled={isLoading}
           className="w-full px-6 py-3 bg-black text-white text-base font-bold hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
         >
-          {isLoading ? 'Verwerken...' : 'Vergelijk Prijzen'}
+          {isLoading ? 'Verwerken...' : 'Vergelijk prijzen'}
         </button>
       </form>
     </div>

@@ -46,17 +46,17 @@ function CountryCard({ country, countryCode, product, isCheapest }: CountryCardP
     >
       <div className="text-center mb-4">
         <div className="text-4xl mb-2">{countryFlags[countryCode]}</div>
-        <h3 className="text-xl font-bold">{displayName}</h3>
+        <h3 className="text-lg font-semibold">{displayName}</h3>
         {isCheapest && (
-          <div className="mt-2 inline-block bg-ikea-yellow text-gray-900 px-4 py-1 border-2 border-black text-sm font-bold">
-            ✓ Beste Prijs
+          <div className="mt-2 inline-block bg-ikea-pink text-white px-3 py-1 text-xs font-bold uppercase tracking-wide">
+            Beste prijs
           </div>
         )}
       </div>
 
       <div className="space-y-4">
         <div className="text-center">
-          <div className="text-3xl font-bold text-gray-900">
+          <div className="text-2xl font-semibold text-gray-900">
             {product.currency} {Number(product.price).toFixed(2)}
           </div>
 
@@ -132,31 +132,76 @@ export default function ComparisonTable({ result }: ComparisonTableProps) {
     );
   }
 
+  // Calculate price overview
+  const prices = [
+    { country: 'BE', price: products.belgium?.price, name: products.belgium?.storeAvailability?.storeName || 'België' },
+    { country: 'NL', price: products.netherlands?.price, name: products.netherlands?.storeAvailability?.storeName || 'Nederland' },
+    { country: 'FR', price: products.france?.price, name: products.france?.storeAvailability?.storeName || 'Frankrijk' }
+  ].filter(p => p.price !== undefined) as Array<{ country: string; price: number; name: string }>;
+
+  const minPrice = prices.length > 0 ? Math.min(...prices.map(p => p.price)) : 0;
+  const maxPrice = prices.length > 0 ? Math.max(...prices.map(p => p.price)) : 0;
+  const savings = maxPrice - minPrice;
+  const cheapestStores = prices.filter(p => p.price === minPrice);
+
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-8">
-      {/* Product Header */}
-      <div className="bg-white border-2 border-gray-300 p-6">
-        <div className="flex flex-col md:flex-row gap-6 items-center">
-          {anyProduct.imageUrl && (
-            <div className="flex-shrink-0">
-              <div className="w-48 h-48 relative">
-                <Image
-                  src={anyProduct.imageUrl}
-                  alt={anyProduct.name}
-                  fill
-                  className="object-contain"
-                  unoptimized
-                />
+    <div className="w-full max-w-6xl mx-auto space-y-6">
+      {/* Product Header and Overview */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Product Information */}
+        <div className="bg-white border-2 border-gray-300 p-6">
+          <div className="flex flex-col md:flex-row gap-6 items-center">
+            {anyProduct.imageUrl && (
+              <div className="flex-shrink-0">
+                <div className="w-32 h-32 relative">
+                  <Image
+                    src={anyProduct.imageUrl}
+                    alt={anyProduct.name}
+                    fill
+                    className="object-contain"
+                    unoptimized
+                  />
+                </div>
+              </div>
+            )}
+            <div className="flex-1 text-center md:text-left">
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                {anyProduct.name}
+              </h2>
+              <p className="text-sm text-gray-600">
+                Productcode: <span className="font-mono font-medium">{result.productId}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Price Overview */}
+        <div className="bg-ikea-blue border-2 border-black p-6 text-white">
+          <h3 className="text-base font-semibold mb-4">Prijsoverzicht</h3>
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <div className="text-xs opacity-90 mb-1">Beste prijs</div>
+              <div className="text-2xl font-semibold">
+                €{minPrice.toFixed(2)}
+              </div>
+              <div className="text-sm mt-1 opacity-90">
+                {cheapestStores.map((store, idx) => (
+                  <span key={store.country}>
+                    {idx > 0 && (idx === cheapestStores.length - 1 ? ' en ' : ', ')}
+                    {store.name}
+                  </span>
+                ))}
               </div>
             </div>
-          )}
-          <div className="flex-1 text-center md:text-left">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              {anyProduct.name}
-            </h2>
-            <p className="text-gray-600">
-              Productcode: <span className="font-mono font-semibold">{result.productId}</span>
-            </p>
+            <div>
+              <div className="text-xs opacity-90 mb-1">Je kunt besparen</div>
+              <div className="text-2xl font-semibold text-ikea-pink-light">
+                €{savings.toFixed(2)}
+              </div>
+              <div className="text-sm mt-1 opacity-90">
+                {maxPrice > 0 ? `${((savings / maxPrice) * 100).toFixed(1)}% korting` : '0% korting'}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -182,41 +227,6 @@ export default function ComparisonTable({ result }: ComparisonTableProps) {
           isCheapest={cheapest?.includes('FR') ?? false}
         />
       </div>
-
-      {/* Price Difference Summary */}
-      {cheapest && cheapest.length > 0 && (
-        <div className="p-4 border-2 bg-ikea-yellow-light border-black">
-          <p className="text-center text-sm text-gray-900">
-            <strong>Beste prijs:</strong>{' '}
-            {cheapest.map((code, idx) => {
-              const countryMap = { BE: 'België', NL: 'Nederland', FR: 'Frankrijk' };
-              const product = code === 'BE' ? products.belgium : code === 'NL' ? products.netherlands : products.france;
-              const storeName = product?.storeAvailability?.storeName || countryMap[code];
-              return (
-                <span key={code}>
-                  {idx > 0 && (idx === cheapest.length - 1 ? ' en ' : ', ')}
-                  {storeName}
-                </span>
-              );
-            })}.
-            {(() => {
-              const prices = [
-                products.belgium?.price,
-                products.netherlands?.price,
-                products.france?.price,
-              ].filter((p): p is number => p !== null && p !== undefined);
-
-              if (prices.length > 1) {
-                const min = Math.min(...prices);
-                const max = Math.max(...prices);
-                const savings = max - min;
-                return savings > 0 ? ` Je kan €${savings.toFixed(2)} besparen door de goedkoopste optie te kiezen.` : '';
-              }
-              return '';
-            })()}
-          </p>
-        </div>
-      )}
     </div>
   );
 }

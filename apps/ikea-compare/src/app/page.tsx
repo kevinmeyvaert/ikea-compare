@@ -229,7 +229,7 @@ function IndexContent() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                 </svg>
-                Enkel Product
+                Enkel product
               </button>
               <button
                 onClick={() => setMode('share')}
@@ -242,7 +242,7 @@ function IndexContent() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                 </svg>
-                Share Link
+                Share link
               </button>
               <button
                 onClick={() => setMode('list')}
@@ -255,7 +255,7 @@ function IndexContent() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                PDF Upload
+                Pdf upload
               </button>
             </div>
 
@@ -389,7 +389,7 @@ function IndexContent() {
                       <li>Open je <strong>winkelwagen</strong></li>
                       <li>Klik op de <strong>&ldquo;Deel&rdquo;</strong> of <strong>&ldquo;Share&rdquo;</strong> knop</li>
                       <li>Kopieer de gegenereerde share link</li>
-                      <li>Plak de link in het invoerveld links en klik op <strong>&ldquo;Vergelijk Prijzen&rdquo;</strong></li>
+                      <li>Plak de link in het invoerveld links en klik op <strong>&ldquo;Vergelijk prijzen&rdquo;</strong></li>
                     </ol>
                     <div className="mt-6 pt-4 border-t border-gray-300">
                       <p className="text-sm text-gray-700 font-semibold mb-2">

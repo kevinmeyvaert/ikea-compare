@@ -96,7 +96,7 @@ export default function StoreSettingsModal({ isOpen, onClose, onStoreChange }: S
                   stores={getStoresByCountry('BE')}
                   selectedStore={belgiumStore}
                   onStoreSelect={(buCode) => handleStoreSelect('BE', buCode)}
-                  placeholder="Selecteer Belgische winkel..."
+                  placeholder="Selecteer belgische winkel..."
                 />
               </div>
 

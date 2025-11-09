@@ -136,21 +136,21 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
     // Title
     doc.setFontSize(20);
     doc.setTextColor(0, 88, 163); // IKEA blue
-    doc.text('IKEA Winkellijst Analyse', 14, 20);
+    doc.text('IKEA winkellijst analyse', 14, 20);
 
     // Summary
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
-    doc.text(`Totaal Producten: ${analysis.totalProducts}`, 14, 35);
-    doc.text(`Succesvol Opgehaald: ${analysis.successfullyFetched}`, 14, 42);
+    doc.text(`Totaal producten: ${analysis.totalProducts}`, 14, 35);
+    doc.text(`Succesvol opgehaald: ${analysis.successfullyFetched}`, 14, 42);
 
     // Optimized Strategy Summary
     doc.setFontSize(14);
     doc.setTextColor(0, 88, 163);
-    doc.text('Geoptimaliseerde Winkelstrategie', 14, 55);
+    doc.text('Geoptimaliseerde winkelstrategie', 14, 55);
     doc.setFontSize(11);
     doc.setTextColor(0, 0, 0);
-    doc.text(`Totale Kosten: €${optimizedStrategy.totalCost.toFixed(2)}`, 14, 63);
+    doc.text(`Totale kosten: €${optimizedStrategy.totalCost.toFixed(2)}`, 14, 63);
     doc.text(`Besparing t.o.v. enkel ${storeNames.BE}: €${optimizedStrategy.savings.toFixed(2)}`, 14, 70);
 
     let currentY = 85;
@@ -196,7 +196,7 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
           product.productId,
           productData?.name.substring(0, 35) || 'Onbekend',
           `€${currentPrice?.toFixed(2) || '-'}`,
-          isCheapest ? '✓ Beste' : '⚠ Beschikbaar'
+          isCheapest ? '✓ Beste prijs' : '⚠ Beschikbaar'
         ];
       }).filter(Boolean);
 
@@ -258,13 +258,13 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
     <div className="space-y-6">
       {/* Header with Reset */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">Winkellijst Analyse</h2>
+        <h2 className="text-xl font-semibold text-gray-900">Winkellijst analyse</h2>
         <div className="flex gap-2">
           <button
             onClick={exportToPDF}
-            className="px-4 py-2.5 bg-ikea-yellow text-gray-900 text-sm font-bold border-2 border-black hover:bg-yellow-400 transition-colors"
+            className="px-4 py-2.5 bg-ikea-pink text-white text-sm font-medium border-2 border-ikea-pink hover:bg-red-600 transition-colors"
           >
-            📄 Exporteer PDF
+            📄 Exporteer pdf
           </button>
           <button
             onClick={onReset}
@@ -277,11 +277,11 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
 
       {/* Price Overview */}
       <div className="bg-ikea-blue border-2 border-black p-6 text-white">
-        <h3 className="text-lg font-bold mb-4">Prijsvergelijking Overzicht</h3>
+        <h3 className="text-base font-semibold mb-4">Prijsvergelijking overzicht</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <div className="text-sm opacity-90 mb-1">Winkelen bij Geselecteerde Winkel</div>
-            <div className="text-3xl font-bold">
+            <div className="text-xs opacity-90 mb-1">Winkelen bij geselecteerde winkel</div>
+            <div className="text-2xl font-semibold">
               €{optimizedStrategy.belgiumTotal.toFixed(2)}
             </div>
             <div className="text-sm mt-1 opacity-90">
@@ -289,8 +289,8 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
             </div>
           </div>
           <div>
-            <div className="text-sm opacity-90 mb-1">Jouw Geoptimaliseerde Kosten</div>
-            <div className="text-3xl font-bold">
+            <div className="text-xs opacity-90 mb-1">Jouw geoptimaliseerde kosten</div>
+            <div className="text-2xl font-semibold">
               €{optimizedStrategy.totalCost.toFixed(2)}
             </div>
             <div className="text-sm mt-1 opacity-90">
@@ -300,8 +300,8 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
             </div>
           </div>
           <div>
-            <div className="text-sm opacity-90 mb-1">Je Bespaart t.o.v. Geselecteerde Winkel</div>
-            <div className="text-3xl font-bold text-ikea-yellow">
+            <div className="text-xs opacity-90 mb-1">Je bespaart t.o.v. geselecteerde winkel</div>
+            <div className="text-2xl font-semibold text-ikea-pink-light">
               €{optimizedStrategy.savings.toFixed(2)}
             </div>
             <div className="text-sm mt-1 opacity-90">
@@ -315,7 +315,7 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
 
       {/* Store Selection */}
       <div className="bg-white border-2 border-gray-300 p-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-4">Selecteer Winkels om te Bezoeken</h3>
+        <h3 className="text-base font-semibold text-gray-900 mb-4">Selecteer winkels om te bezoeken</h3>
         <p className="text-sm text-gray-600 mb-4">
           Kies welke winkels je wilt bezoeken. We berekenen de beste winkelstrategie op basis van je selectie.
         </p>
@@ -379,7 +379,7 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
       {/* Optimized Shopping Strategy */}
       <div className="bg-white border-2 border-gray-300 overflow-hidden">
         <div className="p-4 bg-gray-50 border-b-2 border-gray-300">
-          <h3 className="font-bold text-gray-900">Jouw Geoptimaliseerde Winkelstrategie</h3>
+          <h3 className="text-base font-semibold text-gray-900">Jouw geoptimaliseerde winkelstrategie</h3>
           <p className="text-xs text-gray-600 mt-1">
             Klik op een winkel om je winkellijst te zien
           </p>
@@ -454,7 +454,7 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
                       {storeProducts.map((item) => item && (
                         <div
                           key={item.productId}
-                          className={`p-3 border-2 ${item.isCheapestOverall ? 'bg-ikea-yellow-light border-ikea-yellow' : 'bg-gray-50 border-gray-300'}`}
+                          className={`p-3 border-2 ${item.isCheapestOverall ? 'bg-ikea-pink-light border-ikea-pink' : 'bg-gray-50 border-gray-300'}`}
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex-1 min-w-0">
@@ -467,9 +467,9 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
                               )}
                             </div>
                             <div className="flex flex-col items-end flex-shrink-0">
-                              <div className="text-lg font-bold text-gray-900">€{item.price?.toFixed(2)}</div>
+                              <div className="text-base font-semibold text-gray-900">€{item.price?.toFixed(2)}</div>
                               {item.isCheapestOverall && (
-                                <div className="text-xs text-gray-600 mt-1">✓ Beste prijs</div>
+                                <div className="text-xs text-ikea-pink font-medium mt-1">✓ Beste prijs</div>
                               )}
                             </div>
                           </div>
@@ -497,7 +497,7 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
         >
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-gray-900">Volledige Prijsvergelijking ({analysis.products.length} producten)</h3>
+              <h3 className="text-base font-semibold text-gray-900">Volledige prijsvergelijking ({analysis.products.length} producten)</h3>
               <p className="text-xs text-gray-600 mt-1">
                 {showFullTable ? 'Klik om te verbergen' : 'Klik om alle prijzen per land te zien'}
               </p>
@@ -549,18 +549,18 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
                         </div>
                       </div>
                     </td>
-                    <td className={`px-4 py-3 text-center text-sm ${product.cheapest === 'BE' ? 'bg-ikea-yellow-light font-bold' : ''}`}>
+                    <td className={`px-4 py-3 text-center text-sm ${product.cheapest === 'BE' ? 'bg-ikea-pink-light font-semibold text-ikea-pink' : ''}`}>
                       {product.products.belgium?.price ? `€${product.products.belgium.price.toFixed(2)}` : '-'}
                     </td>
-                    <td className={`px-4 py-3 text-center text-sm ${product.cheapest === 'NL' ? 'bg-ikea-yellow-light font-bold' : ''}`}>
+                    <td className={`px-4 py-3 text-center text-sm ${product.cheapest === 'NL' ? 'bg-ikea-pink-light font-semibold text-ikea-pink' : ''}`}>
                       {product.products.netherlands?.price ? `€${product.products.netherlands.price.toFixed(2)}` : '-'}
                     </td>
-                    <td className={`px-4 py-3 text-center text-sm ${product.cheapest === 'FR' ? 'bg-ikea-yellow-light font-bold' : ''}`}>
+                    <td className={`px-4 py-3 text-center text-sm ${product.cheapest === 'FR' ? 'bg-ikea-pink-light font-semibold text-ikea-pink' : ''}`}>
                       {product.products.france?.price ? `€${product.products.france.price.toFixed(2)}` : '-'}
                     </td>
                     <td className="px-4 py-3 text-center">
                       {product.cheapest && (
-                        <span className="inline-block px-2 py-1 bg-ikea-yellow text-gray-900 text-xs font-bold border border-black">
+                        <span className="inline-block px-2 py-1 bg-ikea-pink text-white text-xs font-medium uppercase tracking-wide">
                           {product.cheapest}
                         </span>
                       )}
