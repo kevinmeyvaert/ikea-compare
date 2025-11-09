@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { track } from '@vercel/analytics';
+import { logEvent } from 'firebase/analytics';
+import { analytics } from '../lib/firebase';
 import Image from 'next/image';
 import ProductSearch from './components/ProductSearch';
 import ComparisonTable from './components/ComparisonTable';
@@ -91,10 +92,12 @@ function IndexContent() {
       setResult(priceData);
 
       // Track successful product comparison
-      track('Product Compared', {
-        productId,
-        productName: priceData.products.belgium?.name || priceData.products.netherlands?.name || priceData.products.france?.name || 'Unknown',
-      });
+      if (analytics) {
+        logEvent(analytics, 'product_compared', {
+          product_id: productId,
+          product_name: priceData.products.belgium?.name || priceData.products.netherlands?.name || priceData.products.france?.name || 'Unknown',
+        });
+      }
     } catch (err: any) {
       setError(err.message || 'An error occurred while fetching product data');
     } finally {
@@ -131,10 +134,12 @@ function IndexContent() {
       setError(null);
 
       // Track successful share link analysis
-      track('Share Link Analyzed', {
-        productCount: analysis.products?.length || 0,
-        totalItems: analysis.products?.reduce((sum: number, p: any) => sum + (p.quantity || 1), 0) || 0,
-      });
+      if (analytics) {
+        logEvent(analytics, 'share_link_analyzed', {
+          product_count: analysis.products?.length || 0,
+          total_items: analysis.products?.reduce((sum: number, p: any) => sum + (p.quantity || 1), 0) || 0,
+        });
+      }
     } catch (err: any) {
       setError(err.message || 'Er is een fout opgetreden bij het verwerken van de share link');
     } finally {
@@ -185,9 +190,11 @@ function IndexContent() {
     // and setMode clears all results
 
     // Track successful PDF upload
-    track('PDF Uploaded', {
-      productCount: analysis.products?.length || 0,
-    });
+    if (analytics) {
+      logEvent(analytics, 'pdf_uploaded', {
+        product_count: analysis.products?.length || 0,
+      });
+    }
   }, []);
 
   const handleResetShoppingList = useCallback(() => {
