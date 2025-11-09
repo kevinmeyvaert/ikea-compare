@@ -17,7 +17,13 @@ module.exports = {
     //     ...createGlobPatternsForDependencies(__dirname)
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        'ikea-blue': '#0058A3',
+        'ikea-yellow': '#FFDB00',
+        'ikea-yellow-light': '#FFF9E6',
+      },
+    },
   },
   plugins: [],
 };
