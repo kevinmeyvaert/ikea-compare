@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, memo } from 'react';
 import { ShoppingListAnalysis } from '../../lib/shopping-list/types';
 import { getSelectedStore } from '../../lib/stores/store-manager';
 import Image from 'next/image';
@@ -12,7 +12,7 @@ interface ShoppingListAnalysisProps {
   onReset: () => void;
 }
 
-export default function ShoppingListAnalysisComponent({ analysis, onReset }: ShoppingListAnalysisProps) {
+const ShoppingListAnalysisComponent = memo(function ShoppingListAnalysisComponent({ analysis, onReset }: ShoppingListAnalysisProps) {
   const [selectedStores, setSelectedStores] = useState<Set<'BE' | 'NL' | 'FR'>>(
     new Set(['BE', 'NL', 'FR'])
   );
@@ -40,8 +40,8 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
     });
   }, []);
 
-  // Calculate optimized strategy based on selected stores
-  const calculateOptimizedStrategy = () => {
+  // Calculate optimized strategy based on selected stores (memoized to prevent recalculation)
+  const optimizedStrategy = useMemo(() => {
     let totalCost = 0;
     const breakdown: { store: 'BE' | 'NL' | 'FR'; storeName: string; productCount: number; subtotal: number; products: string[] }[] = [];
 
@@ -102,9 +102,7 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
       breakdown: breakdown.filter(b => b.productCount > 0),
       belgiumTotal,
     };
-  };
-
-  const optimizedStrategy = calculateOptimizedStrategy();
+  }, [selectedStores, analysis, storeNames]);
 
   const handleStoreToggle = (storeCode: 'BE' | 'NL' | 'FR') => {
     const newSelected = new Set(selectedStores);
@@ -576,4 +574,6 @@ export default function ShoppingListAnalysisComponent({ analysis, onReset }: Sho
       </div>
     </div>
   );
-}
+});
+
+export default ShoppingListAnalysisComponent;

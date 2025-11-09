@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { ProductComparisonResult, ProductData } from '../../lib/scrapers/types';
 import Image from 'next/image';
 
@@ -118,7 +119,7 @@ function CountryCard({ country, countryCode, product, isCheapest }: CountryCardP
   );
 }
 
-export default function ComparisonTable({ result }: ComparisonTableProps) {
+const ComparisonTable = memo(function ComparisonTable({ result }: ComparisonTableProps) {
   const { products, cheapest } = result;
 
   // Get product name and image from any available product
@@ -229,4 +230,6 @@ export default function ComparisonTable({ result }: ComparisonTableProps) {
       </div>
     </div>
   );
-}
+});
+
+export default ComparisonTable;

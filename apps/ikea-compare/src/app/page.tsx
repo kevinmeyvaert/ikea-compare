@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import ProductSearch from './components/ProductSearch';
@@ -31,8 +31,8 @@ function IndexContent() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [hasLoadedFromUrl, setHasLoadedFromUrl] = useState(false);
 
-  // Handler functions need to be defined before useEffect
-  const handleSearch = async (productId: string) => {
+  // Handler functions wrapped with useCallback to prevent recreation
+  const handleSearch = useCallback(async (productId: string) => {
     setLoading(true);
     setError(null);
     setResult(null);
@@ -93,9 +93,9 @@ function IndexContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
-  const handleShareLinkSubmit = async (shareLink: string) => {
+  const handleShareLinkSubmit = useCallback(async (shareLink: string) => {
     setLoading(true);
     setError(null);
 
@@ -127,7 +127,7 @@ function IndexContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
   // Auto-load from URL params on mount
   useEffect(() => {
@@ -143,51 +143,47 @@ function IndexContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlMode, urlProductId, urlShareLink, hasLoadedFromUrl]);
 
-  // Sync URL with mode state
-  useEffect(() => {
-    if (urlMode && urlMode !== mode) {
-      setModeState(urlMode);
-    }
-  }, [urlMode, mode]);
+  // Update mode state and URL (only when user clicks buttons)
+  const setMode = useCallback((newMode: 'single' | 'list' | 'share') => {
+    if (mode === newMode) return; // Prevent unnecessary updates
 
-  // Update URL when mode changes
-  const setMode = (newMode: 'single' | 'list' | 'share') => {
     setModeState(newMode);
     // Clear results when switching modes
     setResult(null);
     setShoppingListAnalysis(null);
     setError(null);
-    // Clear product/share params when switching modes
-    router.push(`/?mode=${newMode}`, { scroll: false });
-  };
+    // Update URL without adding to history (prevents re-render issues)
+    router.replace(`/?mode=${newMode}`, { scroll: false });
+  }, [router, mode]);
 
-  const handleStoreChange = () => {
+  const handleStoreChange = useCallback(() => {
     // If there's a current result, refresh it to show new store availability
     if (result) {
       handleSearch(result.productId);
     }
     // If there's a shopping list analysis, you might want to refresh that too
     // For now, we'll just let the user know they need to re-run the comparison
-  };
+  }, [result, handleSearch]);
 
-  const handlePDFUploadSuccess = (analysis: ShoppingListAnalysisType) => {
+  const handlePDFUploadSuccess = useCallback((analysis: ShoppingListAnalysisType) => {
     setShoppingListAnalysis(analysis);
     setError(null);
     // Don't call setMode('list') here since we're already in list mode
     // and setMode clears all results
-  };
+  }, []);
 
-  const handleResetShoppingList = () => {
+  const handleResetShoppingList = useCallback(() => {
     setShoppingListAnalysis(null);
     setMode('single');
-  };
+  }, [setMode]);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex flex-col lg:flex-row min-h-screen">
         {/* Left Sidebar */}
         <aside className="lg:w-96 bg-white border-r border-gray-200 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
-          <div className="p-6">
+          <div className="p-6 flex flex-col min-h-full">
+            <div className="flex-1">
             {/* Header */}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-2 gap-3">
@@ -259,46 +255,48 @@ function IndexContent() {
               </button>
             </div>
 
-            {/* Single Product Mode */}
-            {mode === 'single' && (
-              <>
-                {/* Search Component */}
-                <div className="mb-8">
-                  <ProductSearch onSearch={handleSearch} isLoading={loading} />
-                </div>
-              </>
-            )}
+            {/* Mode-specific input */}
+            <div className="mb-8">
+              {mode === 'single' && (
+                <ProductSearch onSearch={handleSearch} isLoading={loading} />
+              )}
+              {mode === 'share' && (
+                <ShareLinkInput
+                  onSubmit={handleShareLinkSubmit}
+                  isLoading={loading}
+                />
+              )}
+              {mode === 'list' && (
+                <PDFUpload
+                  onUploadSuccess={handlePDFUploadSuccess}
+                  isLoading={loading}
+                  setIsLoading={setLoading}
+                />
+              )}
+            </div>
+            </div>
 
-            {/* Share Link Mode */}
-            {mode === 'share' && (
-              <>
-                <div className="mb-8">
-                  <ShareLinkInput
-                    onSubmit={handleShareLinkSubmit}
-                    isLoading={loading}
-                  />
-                </div>
-              </>
-            )}
-
-            {/* Shopping List Mode */}
-            {mode === 'list' && (
-              <>
-                <div className="mb-8">
-                  <PDFUpload
-                    onUploadSuccess={handlePDFUploadSuccess}
-                    isLoading={loading}
-                    setIsLoading={setLoading}
-                  />
-                </div>
-              </>
-            )}
-
-            {/* Footer */}
-            <div className="mt-8 pt-6 border-t border-gray-200">
+            {/* Footer - pushed to bottom */}
+            <div className="mt-auto pt-6 border-t border-gray-200 space-y-3">
               <p className="text-xs text-gray-600">
                 Prijzen worden in real-time opgehaald en kunnen variëren. Verifieer altijd op de officiële IKEA website.
               </p>
+              <div className="flex items-center gap-2">
+                <a
+                  href="https://kevinmeyvaert.be"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-xs text-gray-600 hover:text-ikea-blue transition-colors"
+                >
+                  <Image
+                    src="/kev.png"
+                    alt="Kevin Meyvaert"
+                    width={20}
+                    height={20}
+                    className="rounded-full"
+                  />
+                </a>
+              </div>
             </div>
           </div>
         </aside>
@@ -334,10 +332,11 @@ function IndexContent() {
               </div>
             )}
 
-            {/* Single Product Results */}
-            {mode === 'single' && result && !loading && <ComparisonTable result={result} />}
+            {/* Results */}
+            {mode === 'single' && result && !loading && (
+              <ComparisonTable result={result} />
+            )}
 
-            {/* Shopping List Analysis */}
             {(mode === 'list' || mode === 'share') && shoppingListAnalysis && !loading && (
               <ShoppingListAnalysis
                 analysis={shoppingListAnalysis}
