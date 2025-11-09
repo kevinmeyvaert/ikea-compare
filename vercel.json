@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "nx build ikea-compare",
+  "buildCommand": "./node_modules/.bin/nx build ikea-compare",
   "installCommand": "npm install --include=dev",
   "framework": null,
   "outputDirectory": "apps/ikea-compare/.next"
