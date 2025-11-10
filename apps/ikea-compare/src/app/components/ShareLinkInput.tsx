@@ -38,7 +38,7 @@ export default function ShareLinkInput({ onSubmit, isLoading }: ShareLinkInputPr
       <div className="mb-4">
         <h2 className="text-sm font-bold text-gray-900 mb-1">IKEA share link</h2>
         <p className="text-xs text-gray-700">
-          Plak je IKEA winkelwagen share link
+          Plak je IKEA winkelwagen share link van de website of mobiele app
         </p>
       </div>
 
@@ -55,7 +55,7 @@ export default function ShareLinkInput({ onSubmit, isLoading }: ShareLinkInputPr
               setShareLink(e.target.value);
               setError('');
             }}
-            placeholder="https://www.ikea.com/.../receive-share/... of applink.ikea.com/..."
+            placeholder="Plak je share link hier..."
             className="w-full px-4 py-3 text-sm border-2 border-gray-900 focus:outline-none focus:border-ikea-blue transition-colors"
             disabled={isLoading}
           />
