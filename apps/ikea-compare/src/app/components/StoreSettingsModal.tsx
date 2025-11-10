@@ -13,8 +13,8 @@ interface StoreSettingsModalProps {
 
 export default function StoreSettingsModal({ isOpen, onClose, onStoreChange }: StoreSettingsModalProps) {
   const [belgiumStore, setBelgiumStore] = useState<IkeaStore | null>(null);
-  const [_netherlandsStore, setNetherlandsStore] = useState<IkeaStore | null>(null);
-  const [_franceStore, setFranceStore] = useState<IkeaStore | null>(null);
+  const [netherlandsStore, setNetherlandsStore] = useState<IkeaStore | null>(null);
+  const [franceStore, setFranceStore] = useState<IkeaStore | null>(null);
 
   // Load saved preferences on mount and when modal opens
   useEffect(() => {
@@ -106,28 +106,34 @@ export default function StoreSettingsModal({ isOpen, onClose, onStoreChange }: S
                 />
               </div>
 
-              {/* Netherlands - Fixed to Breda */}
+              {/* Netherlands */}
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">
                   <span className="text-lg mr-1">{countryFlags.NL}</span>
                   Nederland
                 </label>
-                <div className="w-full px-3 py-2 bg-gray-100 border-2 border-gray-300 cursor-not-allowed opacity-75">
-                  <div className="text-sm font-medium text-gray-900">IKEA Breda</div>
-                  <div className="text-xs text-gray-600">Breda</div>
-                </div>
+                <StoreSelector
+                  countryCode="NL"
+                  stores={getStoresByCountry('NL')}
+                  selectedStore={netherlandsStore}
+                  onStoreSelect={(buCode) => handleStoreSelect('NL', buCode)}
+                  placeholder="Selecteer nederlandse winkel..."
+                />
               </div>
 
-              {/* France - Fixed to Lille */}
+              {/* France */}
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">
                   <span className="text-lg mr-1">{countryFlags.FR}</span>
                   Frankrijk
                 </label>
-                <div className="w-full px-3 py-2 bg-gray-100 border-2 border-gray-300 cursor-not-allowed opacity-75">
-                  <div className="text-sm font-medium text-gray-900">IKEA Lille</div>
-                  <div className="text-xs text-gray-600">Lille</div>
-                </div>
+                <StoreSelector
+                  countryCode="FR"
+                  stores={getStoresByCountry('FR')}
+                  selectedStore={franceStore}
+                  onStoreSelect={(buCode) => handleStoreSelect('FR', buCode)}
+                  placeholder="Selecteer franse winkel..."
+                />
               </div>
             </div>
           </div>

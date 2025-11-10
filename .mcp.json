@@ -4,6 +4,12 @@
       "type": "stdio",
       "command": "npx",
       "args": ["nx", "mcp"]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
     }
   }
 }
