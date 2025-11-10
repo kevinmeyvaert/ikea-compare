@@ -20,9 +20,12 @@ export default function ShareLinkInput({ onSubmit, isLoading }: ShareLinkInputPr
       return;
     }
 
-    // Validate that it's an IKEA share link
-    if (!shareLink.includes('ikea.com') || !shareLink.includes('favourites/receive-share')) {
-      setError('Ongeldige IKEA share link. De link moet een "favourites/receive-share" URL zijn.');
+    // Validate that it's an IKEA share link (supports both regular and applink URLs)
+    const isRegularShareLink = shareLink.includes('ikea.com') && shareLink.includes('favourites/receive-share');
+    const isAppLink = shareLink.includes('applink.ikea.com');
+
+    if (!isRegularShareLink && !isAppLink) {
+      setError('Ongeldige IKEA share link. De link moet een "favourites/receive-share" of "applink.ikea.com" URL zijn.');
       return;
     }
 
@@ -52,7 +55,7 @@ export default function ShareLinkInput({ onSubmit, isLoading }: ShareLinkInputPr
               setShareLink(e.target.value);
               setError('');
             }}
-            placeholder="https://www.ikea.com/be/nl/favourites/receive-share/..."
+            placeholder="https://www.ikea.com/.../receive-share/... of applink.ikea.com/..."
             className="w-full px-4 py-3 text-sm border-2 border-gray-900 focus:outline-none focus:border-ikea-blue transition-colors"
             disabled={isLoading}
           />
