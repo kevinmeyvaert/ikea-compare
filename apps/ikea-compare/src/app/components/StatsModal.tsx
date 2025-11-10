@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import Image from 'next/image';
 
 interface GlobalStats {
@@ -62,6 +63,36 @@ export default function StatsModal({
   avgSavingsPerComparison,
   countryNames,
 }: StatsModalProps) {
+  // Prevent background scrolling when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  // Close modal on ESC key press
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
@@ -76,11 +107,11 @@ export default function StatsModal({
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div className="bg-white border-2 border-black max-w-4xl w-full max-h-[90vh] overflow-y-auto">
           {/* Header */}
-          <div className="sticky top-0 bg-black border-b-2 border-black px-6 py-4 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-white">KOMPRÅRE statistieken</h2>
+          <div className="sticky top-0 bg-black border-b-2 border-black px-6 py-4 flex items-center justify-between gap-4 z-10">
+            <h2 className="text-lg font-bold text-white min-w-0 truncate">KOMPRÅRE statistieken</h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors"
+              className="text-gray-400 hover:text-white transition-colors flex-shrink-0"
               aria-label="Sluit"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
