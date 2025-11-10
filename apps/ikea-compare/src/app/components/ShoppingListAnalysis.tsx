@@ -13,19 +13,20 @@ interface ShoppingListAnalysisProps {
 }
 
 const ShoppingListAnalysisComponent = memo(function ShoppingListAnalysisComponent({ analysis, onReset }: ShoppingListAnalysisProps) {
-  const [selectedStores, setSelectedStores] = useState<Set<'BE' | 'NL' | 'FR'>>(
-    new Set(['BE', 'NL', 'FR'])
+  const [selectedStores, setSelectedStores] = useState<Set<'BE' | 'NL' | 'FR' | 'DE'>>(
+    new Set(['BE', 'NL', 'FR', 'DE'])
   );
-  const [expandedStores, setExpandedStores] = useState<Set<'BE' | 'NL' | 'FR'>>(
-    new Set(['BE', 'NL', 'FR']) // All expanded by default
+  const [expandedStores, setExpandedStores] = useState<Set<'BE' | 'NL' | 'FR' | 'DE'>>(
+    new Set(['BE', 'NL', 'FR', 'DE']) // All expanded by default
   );
   const [showFullTable, setShowFullTable] = useState(false);
 
   // Get selected store names
-  const [storeNames, setStoreNames] = useState<Record<'BE' | 'NL' | 'FR', string>>({
+  const [storeNames, setStoreNames] = useState<Record<'BE' | 'NL' | 'FR' | 'DE', string>>({
     BE: 'België',
     NL: 'Nederland',
     FR: 'Frankrijk',
+    DE: 'Duitsland',
   });
 
   useEffect(() => {
@@ -33,11 +34,13 @@ const ShoppingListAnalysisComponent = memo(function ShoppingListAnalysisComponen
       const beStore = await getSelectedStore('BE');
       const nlStore = await getSelectedStore('NL');
       const frStore = await getSelectedStore('FR');
+      const deStore = await getSelectedStore('DE');
 
       setStoreNames({
         BE: beStore?.name || 'België',
         NL: nlStore?.name || 'Nederland',
         FR: frStore?.name || 'Frankrijk',
+        DE: deStore?.name || 'Duitsland',
       });
     };
     loadStoreNames();
@@ -46,7 +49,7 @@ const ShoppingListAnalysisComponent = memo(function ShoppingListAnalysisComponen
   // Calculate optimized strategy based on selected stores (memoized to prevent recalculation)
   const optimizedStrategy = useMemo(() => {
     let totalCost = 0;
-    const breakdown: { store: 'BE' | 'NL' | 'FR'; storeName: string; productCount: number; subtotal: number; products: string[] }[] = [];
+    const breakdown: { store: 'BE' | 'NL' | 'FR' | 'DE'; storeName: string; productCount: number; subtotal: number; products: string[] }[] = [];
 
     // Initialize breakdown for selected stores
     selectedStores.forEach(store => {
@@ -62,7 +65,7 @@ const ShoppingListAnalysisComponent = memo(function ShoppingListAnalysisComponen
     // For each product, find cheapest among selected stores
     analysis.products.forEach(product => {
       let cheapestPrice = Infinity;
-      let cheapestStore: 'BE' | 'NL' | 'FR' | null = null;
+      let cheapestStore: 'BE' | 'NL' | 'FR' | 'DE' | null = null;
 
       // Check prices in selected stores only
       if (selectedStores.has('BE') && product.products.belgium?.price) {
@@ -81,6 +84,12 @@ const ShoppingListAnalysisComponent = memo(function ShoppingListAnalysisComponen
         if (product.products.france.price < cheapestPrice) {
           cheapestPrice = product.products.france.price;
           cheapestStore = 'FR';
+        }
+      }
+      if (selectedStores.has('DE') && product.products.germany?.price) {
+        if (product.products.germany.price < cheapestPrice) {
+          cheapestPrice = product.products.germany.price;
+          cheapestStore = 'DE';
         }
       }
 
@@ -107,7 +116,7 @@ const ShoppingListAnalysisComponent = memo(function ShoppingListAnalysisComponen
     };
   }, [selectedStores, analysis, storeNames]);
 
-  const handleStoreToggle = (storeCode: 'BE' | 'NL' | 'FR') => {
+  const handleStoreToggle = (storeCode: 'BE' | 'NL' | 'FR' | 'DE') => {
     const newSelected = new Set(selectedStores);
     if (newSelected.has(storeCode)) {
       // Must keep at least one store selected
@@ -120,7 +129,7 @@ const ShoppingListAnalysisComponent = memo(function ShoppingListAnalysisComponen
     setSelectedStores(newSelected);
   };
 
-  const toggleStoreExpansion = (storeCode: 'BE' | 'NL' | 'FR') => {
+  const toggleStoreExpansion = (storeCode: 'BE' | 'NL' | 'FR' | 'DE') => {
     const newExpanded = new Set(expandedStores);
     if (newExpanded.has(storeCode)) {
       newExpanded.delete(storeCode);
@@ -132,7 +141,7 @@ const ShoppingListAnalysisComponent = memo(function ShoppingListAnalysisComponen
 
   const exportToPDF = () => {
     const doc = new jsPDF();
-    const storeMap = { BE: 'belgium', NL: 'netherlands', FR: 'france' } as const;
+    const storeMap = { BE: 'belgium', NL: 'netherlands', FR: 'france', DE: 'germany' } as const;
 
     // Title
     doc.setFontSize(20);
@@ -188,7 +197,8 @@ const ShoppingListAnalysisComponent = memo(function ShoppingListAnalysisComponen
         const allPrices = [
           product.products.belgium?.price,
           product.products.netherlands?.price,
-          product.products.france?.price
+          product.products.france?.price,
+          product.products.germany?.price
         ].filter(p => p !== undefined) as number[];
         const globalCheapest = Math.min(...allPrices);
         const isCheapest = currentPrice === globalCheapest;
@@ -253,6 +263,7 @@ const ShoppingListAnalysisComponent = memo(function ShoppingListAnalysisComponen
     BE: '🇧🇪',
     NL: '🇳🇱',
     FR: '🇫🇷',
+    DE: '🇩🇪',
   };
 
   return (
@@ -388,7 +399,7 @@ const ShoppingListAnalysisComponent = memo(function ShoppingListAnalysisComponen
         <div className="divide-y-2 divide-gray-300">
           {optimizedStrategy.breakdown.map((store) => {
             const isExpanded = expandedStores.has(store.store);
-            const storeMap = { BE: 'belgium', NL: 'netherlands', FR: 'france' } as const;
+            const storeMap = { BE: 'belgium', NL: 'netherlands', FR: 'france', DE: 'germany' } as const;
 
             // Get full product details for this store
             const storeProducts = store.products.map(productId => {
@@ -402,7 +413,8 @@ const ShoppingListAnalysisComponent = memo(function ShoppingListAnalysisComponen
               const allPrices = [
                 product.products.belgium?.price,
                 product.products.netherlands?.price,
-                product.products.france?.price
+                product.products.france?.price,
+                product.products.germany?.price
               ].filter(p => p !== undefined) as number[];
 
               const globalCheapest = Math.min(...allPrices);
@@ -523,12 +535,13 @@ const ShoppingListAnalysisComponent = memo(function ShoppingListAnalysisComponen
                 <th className="px-4 py-3 text-center text-xs font-bold text-gray-700">🇧🇪 BE</th>
                 <th className="px-4 py-3 text-center text-xs font-bold text-gray-700">🇳🇱 NL</th>
                 <th className="px-4 py-3 text-center text-xs font-bold text-gray-700">🇫🇷 FR</th>
+                <th className="px-4 py-3 text-center text-xs font-bold text-gray-700">🇩🇪 DE</th>
                 <th className="px-4 py-3 text-center text-xs font-bold text-gray-700">Beste</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {analysis.products.map((product) => {
-                const anyProduct = product.products.belgium || product.products.netherlands || product.products.france;
+                const anyProduct = product.products.belgium || product.products.netherlands || product.products.france || product.products.germany;
                 return (
                   <tr key={`${product.productId}-${Math.random()}`} className="hover:bg-gray-50">
                     <td className="px-4 py-3">
@@ -558,6 +571,9 @@ const ShoppingListAnalysisComponent = memo(function ShoppingListAnalysisComponen
                     </td>
                     <td className={`px-4 py-3 text-center text-sm ${product.cheapest === 'FR' ? 'bg-ikea-pink-light font-semibold text-ikea-pink' : ''}`}>
                       {product.products.france?.price ? `€${product.products.france.price.toFixed(2)}` : '-'}
+                    </td>
+                    <td className={`px-4 py-3 text-center text-sm ${product.cheapest === 'DE' ? 'bg-ikea-pink-light font-semibold text-ikea-pink' : ''}`}>
+                      {product.products.germany?.price ? `€${product.products.germany.price.toFixed(2)}` : '-'}
                     </td>
                     <td className="px-4 py-3 text-center">
                       {product.cheapest && (

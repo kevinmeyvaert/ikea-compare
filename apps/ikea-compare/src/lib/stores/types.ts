@@ -2,7 +2,7 @@ export interface IkeaStore {
   buCode: string;
   name: string;
   city: string;
-  countryCode: 'BE' | 'NL' | 'FR';
+  countryCode: 'BE' | 'NL' | 'FR' | 'DE';
   country: string;
 }
 
@@ -28,4 +28,5 @@ export interface StorePreferences {
   be?: string; // buCode for Belgium
   nl?: string; // buCode for Netherlands
   fr?: string; // buCode for France
+  de?: string; // buCode for Germany
 }

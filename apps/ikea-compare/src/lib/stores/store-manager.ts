@@ -16,11 +16,11 @@ const MIGRATION_KEY = 'ikea-store-preferences-migrated';
  * Get list of IKEA stores for a specific country
  * Uses ikea-availability-checker package data
  */
-export function getStoresByCountry(countryCode: 'BE' | 'NL' | 'FR'): IkeaStore[] {
+export function getStoresByCountry(countryCode: 'BE' | 'NL' | 'FR' | 'DE'): IkeaStore[] {
   // Note: This is a simplified list. In production, we'd use ikea-availability-checker
   // For now, including commonly used stores
 
-  const stores: Record<'BE' | 'NL' | 'FR', IkeaStore[]> = {
+  const stores: Record<'BE' | 'NL' | 'FR' | 'DE', IkeaStore[]> = {
     BE: [
       { buCode: '169', name: 'IKEA Gent', city: 'Ghent', countryCode: 'BE', country: 'Belgium' },
       { buCode: '179', name: 'IKEA Wilrijk', city: 'Antwerp', countryCode: 'BE', country: 'Belgium' },
@@ -84,6 +84,16 @@ export function getStoresByCountry(countryCode: 'BE' | 'NL' | 'FR'): IkeaStore[]
       { buCode: '645', name: 'IKEA Rivoli', city: 'Paris', countryCode: 'FR', country: 'France' },
       { buCode: '719', name: 'IKEA Italie Deux', city: 'Paris', countryCode: 'FR', country: 'France' },
     ],
+    DE: [
+      { buCode: '102', name: 'IKEA Köln-Am Butzweilerhof', city: 'Cologne', countryCode: 'DE', country: 'Germany' },
+      { buCode: '147', name: 'IKEA Köln-Godorf', city: 'Cologne', countryCode: 'DE', country: 'Germany' },
+      { buCode: '321', name: 'IKEA Düsseldorf', city: 'Düsseldorf', countryCode: 'DE', country: 'Germany' },
+      { buCode: '425', name: 'IKEA Duisburg', city: 'Duisburg', countryCode: 'DE', country: 'Germany' },
+      { buCode: '148', name: 'IKEA Essen', city: 'Essen', countryCode: 'DE', country: 'Germany' },
+      { buCode: '223', name: 'IKEA Dortmund', city: 'Dortmund', countryCode: 'DE', country: 'Germany' },
+      { buCode: '184', name: 'IKEA Osnabrück', city: 'Osnabrück', countryCode: 'DE', country: 'Germany' },
+      { buCode: '494', name: 'IKEA Kaarst', city: 'Kaarst', countryCode: 'DE', country: 'Germany' },
+    ],
   };
 
   return stores[countryCode] || [];
@@ -97,6 +107,7 @@ export function getAllStores(): IkeaStore[] {
     ...getStoresByCountry('BE'),
     ...getStoresByCountry('NL'),
     ...getStoresByCountry('FR'),
+    ...getStoresByCountry('DE'),
   ];
 }
 
@@ -121,13 +132,14 @@ const DEFAULT_STORES = {
   BE: '169', // IKEA Gent
   NL: '403', // IKEA Breda
   FR: '133', // IKEA Lille
+  DE: '494', // IKEA Kaarst
 };
 
 /**
  * Get selected store for a specific country
  * Returns default store if no preference is saved
  */
-export async function getSelectedStore(countryCode: 'BE' | 'NL' | 'FR'): Promise<IkeaStore | null> {
+export async function getSelectedStore(countryCode: 'BE' | 'NL' | 'FR' | 'DE'): Promise<IkeaStore | null> {
   const preferences = await getStorePreferences();
   let buCode = preferences[countryCode.toLowerCase() as keyof StorePreferences];
 
@@ -144,7 +156,7 @@ export async function getSelectedStore(countryCode: 'BE' | 'NL' | 'FR'): Promise
 /**
  * Set selected store for a specific country
  */
-export async function setSelectedStore(countryCode: 'BE' | 'NL' | 'FR', buCode: string): Promise<void> {
+export async function setSelectedStore(countryCode: 'BE' | 'NL' | 'FR' | 'DE', buCode: string): Promise<void> {
   const preferences = await getStorePreferences();
   preferences[countryCode.toLowerCase() as keyof StorePreferences] = buCode;
   await saveStorePreferences(preferences);
@@ -182,6 +194,7 @@ export async function getStorePreferencesFromFirestore(): Promise<StorePreferenc
         be: DEFAULT_STORES.BE,
         nl: DEFAULT_STORES.NL,
         fr: DEFAULT_STORES.FR,
+        de: DEFAULT_STORES.DE,
       };
     }
   } catch (error) {

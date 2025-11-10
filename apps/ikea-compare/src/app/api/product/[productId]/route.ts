@@ -17,11 +17,12 @@ export async function GET(
   }
 
   try {
-    // Fetch from all three countries in parallel
-    const [beResult, nlResult, frResult] = await Promise.allSettled([
+    // Fetch from all four countries in parallel
+    const [beResult, nlResult, frResult, deResult] = await Promise.allSettled([
       scrapeIkeaProduct('BE', productId),
       scrapeIkeaProduct('NL', productId),
       scrapeIkeaProduct('FR', productId),
+      scrapeIkeaProduct('DE', productId),
     ]);
 
     // Process results
@@ -37,8 +38,12 @@ export async function GET(
       ? frResult.value
       : null;
 
+    const germany = deResult.status === 'fulfilled' && !isScraperError(deResult.value)
+      ? deResult.value
+      : null;
+
     // Check if we got at least one successful result
-    if (!belgium && !netherlands && !france) {
+    if (!belgium && !netherlands && !france && !germany) {
       return NextResponse.json(
         {
           error: 'Product not found in any country',
@@ -49,13 +54,14 @@ export async function GET(
     }
 
     // Find cheapest country (or countries if there's a tie)
-    const prices: Array<{ country: 'BE' | 'NL' | 'FR'; price: number }> = [];
+    const prices: Array<{ country: 'BE' | 'NL' | 'FR' | 'DE'; price: number }> = [];
 
     if (belgium) prices.push({ country: 'BE', price: belgium.price });
     if (netherlands) prices.push({ country: 'NL', price: netherlands.price });
     if (france) prices.push({ country: 'FR', price: france.price });
+    if (germany) prices.push({ country: 'DE', price: germany.price });
 
-    let cheapest: ('BE' | 'NL' | 'FR')[] | null = null;
+    let cheapest: ('BE' | 'NL' | 'FR' | 'DE')[] | null = null;
 
     if (prices.length > 0) {
       const minPrice = Math.min(...prices.map(p => p.price));
@@ -68,6 +74,7 @@ export async function GET(
         belgium,
         netherlands,
         france,
+        germany,
       },
       cheapest,
     };

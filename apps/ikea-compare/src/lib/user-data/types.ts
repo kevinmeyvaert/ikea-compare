@@ -22,7 +22,7 @@ export interface HistoryEntry {
   name: string;            // Product name
   imageUrl: string;        // Product image URL
   searchedAt: Timestamp;   // When the product was searched
-  cheapestCountry?: 'BE' | 'NL' | 'FR';  // Which country had the best price
+  cheapestCountry?: 'BE' | 'NL' | 'FR' | 'DE';  // Which country had the best price
   cheapestPrice?: number;  // The lowest price found
 }
 
@@ -33,6 +33,6 @@ export interface ProductData {
   productId: string;
   name: string;
   imageUrl: string;
-  cheapestCountry?: 'BE' | 'NL' | 'FR';
+  cheapestCountry?: 'BE' | 'NL' | 'FR' | 'DE';
   cheapestPrice?: number;
 }

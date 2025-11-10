@@ -23,7 +23,7 @@ export default function LoadingState() {
       <div className="text-center space-y-3 max-w-xl">
         <h3 className="text-xl font-bold text-gray-900">Prijsinformatie ophalen...</h3>
         <p className="text-gray-600 leading-relaxed">
-          We halen prijzen op van IKEA België, Nederland en Frankrijk. Dit kan even duren,
+          We halen prijzen op van IKEA België, Nederland, Frankrijk en Duitsland. Dit kan even duren,
           vooral als je veel verschillende producten zoekt.
         </p>
         <p className="text-sm text-gray-500">

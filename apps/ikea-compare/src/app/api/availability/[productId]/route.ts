@@ -19,9 +19,9 @@ export async function GET(
     );
   }
 
-  if (!country || !['be', 'nl', 'fr'].includes(country)) {
+  if (!country || !['be', 'nl', 'fr', 'de'].includes(country)) {
     return NextResponse.json(
-      { error: 'Invalid country code. Must be: be, nl, or fr' },
+      { error: 'Invalid country code. Must be: be, nl, fr, or de' },
       { status: 400 }
     );
   }
@@ -36,7 +36,7 @@ export async function GET(
   try {
     const availability: StoreAvailability = await fetchStoreAvailability(
       productId,
-      country.toUpperCase() as 'BE' | 'NL' | 'FR',
+      country.toUpperCase() as 'BE' | 'NL' | 'FR' | 'DE',
       storeId
     );
 
@@ -55,7 +55,7 @@ export async function GET(
  */
 async function fetchStoreAvailability(
   productId: string,
-  countryCode: 'BE' | 'NL' | 'FR',
+  countryCode: 'BE' | 'NL' | 'FR' | 'DE',
   storeId: string
 ): Promise<StoreAvailability> {
   try {
@@ -72,7 +72,8 @@ async function fetchStoreAvailability(
     const countryMap = {
       BE: 'be',
       NL: 'nl',
-      FR: 'fr'
+      FR: 'fr',
+      DE: 'de'
     };
     const ikeaCountry = countryMap[countryCode];
 

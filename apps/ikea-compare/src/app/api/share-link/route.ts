@@ -67,7 +67,8 @@ export async function POST(request: NextRequest) {
               ? productData.products[
                   cheapestCountry === 'BE' ? 'belgium'
                   : cheapestCountry === 'NL' ? 'netherlands'
-                  : 'france'
+                  : cheapestCountry === 'FR' ? 'france'
+                  : 'germany'
                 ]?.price || null
               : null,
           });
@@ -101,11 +102,18 @@ export async function POST(request: NextRequest) {
         availableProducts: 0,
         unavailableProducts: 0,
       },
+      {
+        storeCode: 'DE',
+        storeName: 'Germany',
+        totalCost: 0,
+        availableProducts: 0,
+        unavailableProducts: 0,
+      },
     ];
 
     products.forEach((product) => {
-      ['belgium', 'netherlands', 'france'].forEach((country, idx) => {
-        const countryKey = country as 'belgium' | 'netherlands' | 'france';
+      ['belgium', 'netherlands', 'france', 'germany'].forEach((country, idx) => {
+        const countryKey = country as 'belgium' | 'netherlands' | 'france' | 'germany';
         const price = product.products[countryKey]?.price;
         if (price) {
           storeTotals[idx].totalCost += price;
@@ -126,13 +134,14 @@ export async function POST(request: NextRequest) {
       { store: 'BE', storeName: 'Belgium', productCount: 0, subtotal: 0, products: [] },
       { store: 'NL', storeName: 'Netherlands', productCount: 0, subtotal: 0, products: [] },
       { store: 'FR', storeName: 'France', productCount: 0, subtotal: 0, products: [] },
+      { store: 'DE', storeName: 'Germany', productCount: 0, subtotal: 0, products: [] },
     ];
 
     let multiStoreTotalCost = 0;
 
     products.forEach((product) => {
       if (product.cheapest && product.cheapestPrice) {
-        const storeIdx = product.cheapest === 'BE' ? 0 : product.cheapest === 'NL' ? 1 : 2;
+        const storeIdx = product.cheapest === 'BE' ? 0 : product.cheapest === 'NL' ? 1 : product.cheapest === 'FR' ? 2 : 3;
         multiStoreBreakdown[storeIdx].productCount += 1;
         multiStoreBreakdown[storeIdx].subtotal += product.cheapestPrice;
         multiStoreBreakdown[storeIdx].products.push(product.productId);

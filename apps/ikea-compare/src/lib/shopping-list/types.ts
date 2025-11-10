@@ -6,13 +6,14 @@ export interface ShoppingListProduct {
     belgium: ProductData | null;
     netherlands: ProductData | null;
     france: ProductData | null;
+    germany: ProductData | null;
   };
-  cheapest: 'BE' | 'NL' | 'FR' | null;
+  cheapest: 'BE' | 'NL' | 'FR' | 'DE' | null;
   cheapestPrice: number | null;
 }
 
 export interface StoreTotal {
-  storeCode: 'BE' | 'NL' | 'FR';
+  storeCode: 'BE' | 'NL' | 'FR' | 'DE';
   storeName: string;
   totalCost: number;
   availableProducts: number;
@@ -23,7 +24,7 @@ export interface MultiStoreStrategy {
   totalCost: number;
   savings: number;
   breakdown: {
-    store: 'BE' | 'NL' | 'FR';
+    store: 'BE' | 'NL' | 'FR' | 'DE';
     storeName: string;
     productCount: number;
     subtotal: number;

@@ -7,7 +7,7 @@ export interface ProductData {
   currency: string;
   imageUrl: string;
   available: boolean;
-  country: 'BE' | 'NL' | 'FR';
+  country: 'BE' | 'NL' | 'FR' | 'DE';
   url: string;
   storeAvailability?: StoreAvailability; // Store-specific availability data
 }
@@ -18,8 +18,9 @@ export interface ProductComparisonResult {
     belgium: ProductData | null;
     netherlands: ProductData | null;
     france: ProductData | null;
+    germany: ProductData | null;
   };
-  cheapest: ('BE' | 'NL' | 'FR')[] | null;
+  cheapest: ('BE' | 'NL' | 'FR' | 'DE')[] | null;
   error?: string;
 }
 

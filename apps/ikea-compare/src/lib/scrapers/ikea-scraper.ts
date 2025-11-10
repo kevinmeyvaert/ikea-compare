@@ -18,6 +18,11 @@ const COUNTRY_CONFIGS = {
     language: 'fr',
     baseUrl: 'https://www.ikea.com/fr/fr',
   },
+  DE: {
+    code: 'de',
+    language: 'de',
+    baseUrl: 'https://www.ikea.com/de/de',
+  },
 } as const;
 
 /**

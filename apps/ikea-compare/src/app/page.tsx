@@ -72,8 +72,8 @@ function IndexContent() {
 
       // Helper function to fetch and attach availability
       const fetchAvailability = async (
-        country: 'BE' | 'NL' | 'FR',
-        productKey: 'belgium' | 'netherlands' | 'france'
+        country: 'BE' | 'NL' | 'FR' | 'DE',
+        productKey: 'belgium' | 'netherlands' | 'france' | 'germany'
       ) => {
         const store = await getSelectedStore(country);
         if (!store || !priceData.products[productKey]) return;
@@ -97,6 +97,7 @@ function IndexContent() {
       availabilityPromises.push(fetchAvailability('BE', 'belgium'));
       availabilityPromises.push(fetchAvailability('NL', 'netherlands'));
       availabilityPromises.push(fetchAvailability('FR', 'france'));
+      availabilityPromises.push(fetchAvailability('DE', 'germany'));
 
       await Promise.all(availabilityPromises);
 

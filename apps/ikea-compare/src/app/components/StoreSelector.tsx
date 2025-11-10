@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { IkeaStore } from '../../lib/stores/types';
 
 interface StoreSelectorProps {
-  countryCode: 'BE' | 'NL' | 'FR';
+  countryCode: 'BE' | 'NL' | 'FR' | 'DE';
   stores: IkeaStore[];
   selectedStore: IkeaStore | null;
   onStoreSelect: (buCode: string) => void;

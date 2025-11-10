@@ -15,6 +15,7 @@ export default function StoreSettingsModal({ isOpen, onClose, onStoreChange }: S
   const [belgiumStore, setBelgiumStore] = useState<IkeaStore | null>(null);
   const [netherlandsStore, setNetherlandsStore] = useState<IkeaStore | null>(null);
   const [franceStore, setFranceStore] = useState<IkeaStore | null>(null);
+  const [germanyStore, setGermanyStore] = useState<IkeaStore | null>(null);
 
   // Load saved preferences on mount and when modal opens
   useEffect(() => {
@@ -24,15 +25,17 @@ export default function StoreSettingsModal({ isOpen, onClose, onStoreChange }: S
         const be = await getSelectedStore('BE');
         const nl = await getSelectedStore('NL');
         const fr = await getSelectedStore('FR');
+        const de = await getSelectedStore('DE');
         setBelgiumStore(be);
         setNetherlandsStore(nl);
         setFranceStore(fr);
+        setGermanyStore(de);
       };
       loadStores();
     }
   }, [isOpen]);
 
-  const handleStoreSelect = async (countryCode: 'BE' | 'NL' | 'FR', buCode: string) => {
+  const handleStoreSelect = async (countryCode: 'BE' | 'NL' | 'FR' | 'DE', buCode: string) => {
     await setSelectedStore(countryCode, buCode);
 
     // Update state
@@ -42,6 +45,7 @@ export default function StoreSettingsModal({ isOpen, onClose, onStoreChange }: S
     if (countryCode === 'BE') setBelgiumStore(store);
     if (countryCode === 'NL') setNetherlandsStore(store);
     if (countryCode === 'FR') setFranceStore(store);
+    if (countryCode === 'DE') setGermanyStore(store);
 
     // Notify parent component
     if (onStoreChange) {
@@ -53,6 +57,7 @@ export default function StoreSettingsModal({ isOpen, onClose, onStoreChange }: S
     BE: '🇧🇪',
     NL: '🇳🇱',
     FR: '🇫🇷',
+    DE: '🇩🇪',
   };
 
   if (!isOpen) return null;
@@ -133,6 +138,21 @@ export default function StoreSettingsModal({ isOpen, onClose, onStoreChange }: S
                   selectedStore={franceStore}
                   onStoreSelect={(buCode) => handleStoreSelect('FR', buCode)}
                   placeholder="Selecteer franse winkel..."
+                />
+              </div>
+
+              {/* Germany */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  <span className="text-lg mr-1">{countryFlags.DE}</span>
+                  Duitsland
+                </label>
+                <StoreSelector
+                  countryCode="DE"
+                  stores={getStoresByCountry('DE')}
+                  selectedStore={germanyStore}
+                  onStoreSelect={(buCode) => handleStoreSelect('DE', buCode)}
+                  placeholder="Selecteer duitse winkel..."
                 />
               </div>
             </div>

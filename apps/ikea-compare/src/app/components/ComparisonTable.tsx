@@ -11,7 +11,7 @@ interface ComparisonTableProps {
 
 interface CountryCardProps {
   country: string;
-  countryCode: 'BE' | 'NL' | 'FR';
+  countryCode: 'BE' | 'NL' | 'FR' | 'DE';
   product: ProductData | null;
   isCheapest: boolean;
 }
@@ -21,6 +21,7 @@ function CountryCard({ country, countryCode, product, isCheapest }: CountryCardP
     BE: '🇧🇪',
     NL: '🇳🇱',
     FR: '🇫🇷',
+    DE: '🇩🇪',
   };
 
   if (!product) {
@@ -124,7 +125,7 @@ const ComparisonTable = memo(function ComparisonTable({ result }: ComparisonTabl
   const { products, cheapest } = result;
 
   // Get product name and image from any available product
-  const anyProduct = products.belgium || products.netherlands || products.france;
+  const anyProduct = products.belgium || products.netherlands || products.france || products.germany;
 
   if (!anyProduct) {
     return (
@@ -138,7 +139,8 @@ const ComparisonTable = memo(function ComparisonTable({ result }: ComparisonTabl
   const prices = [
     { country: 'BE', price: products.belgium?.price, name: products.belgium?.storeAvailability?.storeName || 'België' },
     { country: 'NL', price: products.netherlands?.price, name: products.netherlands?.storeAvailability?.storeName || 'Nederland' },
-    { country: 'FR', price: products.france?.price, name: products.france?.storeAvailability?.storeName || 'Frankrijk' }
+    { country: 'FR', price: products.france?.price, name: products.france?.storeAvailability?.storeName || 'Frankrijk' },
+    { country: 'DE', price: products.germany?.price, name: products.germany?.storeAvailability?.storeName || 'Duitsland' }
   ].filter(p => p.price !== undefined) as Array<{ country: string; price: number; name: string }>;
 
   const minPrice = prices.length > 0 ? Math.min(...prices.map(p => p.price)) : 0;
@@ -178,7 +180,7 @@ const ComparisonTable = memo(function ComparisonTable({ result }: ComparisonTabl
                   productId: result.productId,
                   name: anyProduct.name,
                   imageUrl: anyProduct.imageUrl || '',
-                  cheapestCountry: cheapest?.[0] as 'BE' | 'NL' | 'FR' | undefined,
+                  cheapestCountry: cheapest?.[0] as 'BE' | 'NL' | 'FR' | 'DE' | undefined,
                   cheapestPrice: minPrice,
                 }}
               />
@@ -218,7 +220,7 @@ const ComparisonTable = memo(function ComparisonTable({ result }: ComparisonTabl
       </div>
 
       {/* Price Comparison Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <CountryCard
           country="België"
           countryCode="BE"
@@ -236,6 +238,12 @@ const ComparisonTable = memo(function ComparisonTable({ result }: ComparisonTabl
           countryCode="FR"
           product={products.france}
           isCheapest={cheapest?.includes('FR') ?? false}
+        />
+        <CountryCard
+          country="Duitsland"
+          countryCode="DE"
+          product={products.germany}
+          isCheapest={cheapest?.includes('DE') ?? false}
         />
       </div>
     </div>
