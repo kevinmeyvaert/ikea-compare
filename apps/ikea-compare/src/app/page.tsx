@@ -16,7 +16,7 @@ import ShoppingListAnalysis from './components/ShoppingListAnalysis';
 import UserDataSection from './components/UserDataSection';
 import { ProductComparisonResult } from '../lib/scrapers/types';
 import { ShoppingListAnalysis as ShoppingListAnalysisType } from '../lib/shopping-list/types';
-import { getSelectedStore } from '../lib/stores/store-manager';
+import { getSelectedStore, migrateLocalStorageToFirestore } from '../lib/stores/store-manager';
 
 function IndexContent() {
   const searchParams = useSearchParams();
@@ -35,9 +35,13 @@ function IndexContent() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [hasLoadedFromUrl, setHasLoadedFromUrl] = useState(false);
 
-  // Initialize anonymous auth on mount
+  // Initialize anonymous auth and migrate store preferences on mount
   useEffect(() => {
-    initializeAnonymousAuth();
+    const initialize = async () => {
+      await initializeAnonymousAuth();
+      await migrateLocalStorageToFirestore();
+    };
+    initialize();
   }, []);
 
   // Handler functions wrapped with useCallback to prevent recreation
@@ -71,7 +75,7 @@ function IndexContent() {
         country: 'BE' | 'NL' | 'FR',
         productKey: 'belgium' | 'netherlands' | 'france'
       ) => {
-        const store = getSelectedStore(country);
+        const store = await getSelectedStore(country);
         if (!store || !priceData.products[productKey]) return;
 
         try {

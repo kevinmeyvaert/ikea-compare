@@ -20,14 +20,20 @@ export default function StoreSettingsModal({ isOpen, onClose, onStoreChange }: S
   useEffect(() => {
     if (isOpen) {
       // Load selected stores (defaults are handled in store-manager)
-      setBelgiumStore(getSelectedStore('BE'));
-      setNetherlandsStore(getSelectedStore('NL'));
-      setFranceStore(getSelectedStore('FR'));
+      const loadStores = async () => {
+        const be = await getSelectedStore('BE');
+        const nl = await getSelectedStore('NL');
+        const fr = await getSelectedStore('FR');
+        setBelgiumStore(be);
+        setNetherlandsStore(nl);
+        setFranceStore(fr);
+      };
+      loadStores();
     }
   }, [isOpen]);
 
-  const handleStoreSelect = (countryCode: 'BE' | 'NL' | 'FR', buCode: string) => {
-    setSelectedStore(countryCode, buCode);
+  const handleStoreSelect = async (countryCode: 'BE' | 'NL' | 'FR', buCode: string) => {
+    await setSelectedStore(countryCode, buCode);
 
     // Update state
     const stores = getStoresByCountry(countryCode);

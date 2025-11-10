@@ -29,15 +29,18 @@ const ShoppingListAnalysisComponent = memo(function ShoppingListAnalysisComponen
   });
 
   useEffect(() => {
-    const beStore = getSelectedStore('BE');
-    const nlStore = getSelectedStore('NL');
-    const frStore = getSelectedStore('FR');
+    const loadStoreNames = async () => {
+      const beStore = await getSelectedStore('BE');
+      const nlStore = await getSelectedStore('NL');
+      const frStore = await getSelectedStore('FR');
 
-    setStoreNames({
-      BE: beStore?.name || 'België',
-      NL: nlStore?.name || 'Nederland',
-      FR: frStore?.name || 'Frankrijk',
-    });
+      setStoreNames({
+        BE: beStore?.name || 'België',
+        NL: nlStore?.name || 'Nederland',
+        FR: frStore?.name || 'Frankrijk',
+      });
+    };
+    loadStoreNames();
   }, []);
 
   // Calculate optimized strategy based on selected stores (memoized to prevent recalculation)

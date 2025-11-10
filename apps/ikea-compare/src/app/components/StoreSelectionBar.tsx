@@ -16,38 +16,22 @@ export default function StoreSelectionBar({ onStoreChange }: StoreSelectionBarPr
 
   // Load saved preferences on mount, with defaults
   useEffect(() => {
-    // Default store codes
-    const DEFAULT_STORES = {
-      BE: '169', // IKEA Gent
-      NL: '403', // IKEA Breda
-      FR: '133', // IKEA Lille
+    const loadStores = async () => {
+      // Load stores (defaults are handled in store-manager)
+      const beStore = await getSelectedStore('BE');
+      setBelgiumStore(beStore);
+
+      const nlStore = await getSelectedStore('NL');
+      setNetherlandsStore(nlStore);
+
+      const frStore = await getSelectedStore('FR');
+      setFranceStore(frStore);
     };
-
-    // Load or set defaults
-    let beStore = getSelectedStore('BE');
-    if (!beStore) {
-      setSelectedStore('BE', DEFAULT_STORES.BE);
-      beStore = getSelectedStore('BE');
-    }
-    setBelgiumStore(beStore);
-
-    let nlStore = getSelectedStore('NL');
-    if (!nlStore) {
-      setSelectedStore('NL', DEFAULT_STORES.NL);
-      nlStore = getSelectedStore('NL');
-    }
-    setNetherlandsStore(nlStore);
-
-    let frStore = getSelectedStore('FR');
-    if (!frStore) {
-      setSelectedStore('FR', DEFAULT_STORES.FR);
-      frStore = getSelectedStore('FR');
-    }
-    setFranceStore(frStore);
+    loadStores();
   }, []);
 
-  const handleStoreSelect = (countryCode: 'BE' | 'NL' | 'FR', buCode: string) => {
-    setSelectedStore(countryCode, buCode);
+  const handleStoreSelect = async (countryCode: 'BE' | 'NL' | 'FR', buCode: string) => {
+    await setSelectedStore(countryCode, buCode);
 
     // Update state
     const stores = getStoresByCountry(countryCode);

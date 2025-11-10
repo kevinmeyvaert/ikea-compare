@@ -1,7 +1,16 @@
 import { IkeaStore, StorePreferences } from './types';
+import {
+  doc,
+  getDoc,
+  setDoc,
+  Timestamp,
+} from 'firebase/firestore';
+import { db } from '../firebase';
+import { getCurrentUserId } from '../user-data/user-data-manager';
 
 // Storage key for localStorage
 const STORAGE_KEY = 'ikea-store-preferences';
+const MIGRATION_KEY = 'ikea-store-preferences-migrated';
 
 /**
  * Get list of IKEA stores for a specific country
@@ -95,31 +104,17 @@ export function getAllStores(): IkeaStore[] {
 }
 
 /**
- * Get saved store preferences from localStorage
+ * Get saved store preferences (now using Firestore)
  */
-export function getStorePreferences(): StorePreferences {
-  if (typeof window === 'undefined') return {};
-
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : {};
-  } catch (error) {
-    console.error('Failed to load store preferences:', error);
-    return {};
-  }
+export async function getStorePreferences(): Promise<StorePreferences> {
+  return await getStorePreferencesFromFirestore();
 }
 
 /**
- * Save store preferences to localStorage
+ * Save store preferences (now using Firestore)
  */
-export function saveStorePreferences(preferences: StorePreferences): void {
-  if (typeof window === 'undefined') return;
-
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
-  } catch (error) {
-    console.error('Failed to save store preferences:', error);
-  }
+export async function saveStorePreferences(preferences: StorePreferences): Promise<void> {
+  return await saveStorePreferencesToFirestore(preferences);
 }
 
 /**
@@ -135,14 +130,14 @@ const DEFAULT_STORES = {
  * Get selected store for a specific country
  * Returns default store if no preference is saved
  */
-export function getSelectedStore(countryCode: 'BE' | 'NL' | 'FR'): IkeaStore | null {
-  const preferences = getStorePreferences();
+export async function getSelectedStore(countryCode: 'BE' | 'NL' | 'FR'): Promise<IkeaStore | null> {
+  const preferences = await getStorePreferences();
   let buCode = preferences[countryCode.toLowerCase() as keyof StorePreferences];
 
   // If no preference is saved, use default and save it
   if (!buCode) {
     buCode = DEFAULT_STORES[countryCode];
-    setSelectedStore(countryCode, buCode);
+    await setSelectedStore(countryCode, buCode);
   }
 
   const stores = getStoresByCountry(countryCode);
@@ -152,10 +147,10 @@ export function getSelectedStore(countryCode: 'BE' | 'NL' | 'FR'): IkeaStore | n
 /**
  * Set selected store for a specific country
  */
-export function setSelectedStore(countryCode: 'BE' | 'NL' | 'FR', buCode: string): void {
-  const preferences = getStorePreferences();
+export async function setSelectedStore(countryCode: 'BE' | 'NL' | 'FR', buCode: string): Promise<void> {
+  const preferences = await getStorePreferences();
   preferences[countryCode.toLowerCase() as keyof StorePreferences] = buCode;
-  saveStorePreferences(preferences);
+  await saveStorePreferences(preferences);
 }
 
 /**
@@ -164,4 +159,104 @@ export function setSelectedStore(countryCode: 'BE' | 'NL' | 'FR', buCode: string
 export function clearStorePreferences(): void {
   if (typeof window === 'undefined') return;
   localStorage.removeItem(STORAGE_KEY);
+}
+
+// ==================== FIRESTORE FUNCTIONS ====================
+
+/**
+ * Get store preferences from Firestore
+ */
+export async function getStorePreferencesFromFirestore(): Promise<StorePreferences> {
+  const userId = getCurrentUserId();
+  if (!db || !userId) {
+    return {};
+  }
+
+  try {
+    const docRef = doc(db, 'storePreferences', userId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      return data.preferences || {};
+    } else {
+      // Return default stores for new users
+      return {
+        be: DEFAULT_STORES.BE,
+        nl: DEFAULT_STORES.NL,
+        fr: DEFAULT_STORES.FR,
+      };
+    }
+  } catch (error) {
+    console.error('[StorePreferences] Failed to load from Firestore:', error);
+    return {};
+  }
+}
+
+/**
+ * Save store preferences to Firestore
+ */
+export async function saveStorePreferencesToFirestore(
+  preferences: StorePreferences
+): Promise<void> {
+  const userId = getCurrentUserId();
+  if (!db || !userId) {
+    throw new Error('Firebase not initialized or user not authenticated');
+  }
+
+  try {
+    const docRef = doc(db, 'storePreferences', userId);
+    await setDoc(docRef, {
+      userId,
+      preferences,
+      updatedAt: Timestamp.now(),
+    });
+  } catch (error) {
+    console.error('[StorePreferences] Failed to save to Firestore:', error);
+    throw error;
+  }
+}
+
+/**
+ * Migrate store preferences from localStorage to Firestore
+ * This is a one-time migration that runs on first load
+ */
+export async function migrateLocalStorageToFirestore(): Promise<void> {
+  const userId = getCurrentUserId();
+  if (typeof window === 'undefined' || !db || !userId) {
+    return;
+  }
+
+  // Check if migration has already been done
+  const migrationComplete = localStorage.getItem(MIGRATION_KEY);
+  if (migrationComplete === 'true') {
+    return;
+  }
+
+  try {
+    // Check if there's existing data in localStorage
+    const localData = localStorage.getItem(STORAGE_KEY);
+    if (!localData) {
+      localStorage.setItem(MIGRATION_KEY, 'true');
+      return;
+    }
+
+    const preferences: StorePreferences = JSON.parse(localData);
+
+    // Check if Firestore already has preferences (in case migration was interrupted)
+    const docRef = doc(db, 'storePreferences', userId);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      // Only migrate if Firestore doesn't have data yet
+      await saveStorePreferencesToFirestore(preferences);
+    }
+
+    // Clear localStorage after successful migration
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.setItem(MIGRATION_KEY, 'true');
+  } catch (error) {
+    console.error('[StorePreferences] Migration failed:', error);
+    // Don't throw - we don't want to break the app if migration fails
+  }
 }
