@@ -5,13 +5,20 @@ import { ProductComparisonResult } from '../../../lib/scrapers/types';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { shareLink } = body;
+    let { shareLink } = body;
 
     if (!shareLink) {
       return NextResponse.json(
         { error: 'Share link is vereist' },
         { status: 400 }
       );
+    }
+
+    // If it's an applink URL, follow the redirect to get the actual share link
+    if (shareLink.includes('applink.ikea.com')) {
+      console.log('[Share Link] Detected applink URL, following redirect...');
+      shareLink = await resolveApplinkRedirect(shareLink);
+      console.log('[Share Link] Resolved to:', shareLink);
     }
 
     // Parse the share link to extract product codes and quantities
@@ -158,6 +165,43 @@ export async function POST(request: NextRequest) {
       { error: error.message || 'Er is een fout opgetreden bij het verwerken van de share link' },
       { status: 500 }
     );
+  }
+}
+
+/**
+ * Resolve applink.ikea.com redirect to get the actual share link
+ * @param applinkUrl The applink.ikea.com URL
+ * @returns The final redirected URL (favourites/receive-share link)
+ */
+async function resolveApplinkRedirect(applinkUrl: string): Promise<string> {
+  try {
+    // Fetch with redirect: 'manual' to capture the redirect location
+    const response = await fetch(applinkUrl, {
+      method: 'HEAD',
+      redirect: 'manual',
+    });
+
+    // Check for redirect response (3xx status codes)
+    if (response.status >= 300 && response.status < 400) {
+      const redirectUrl = response.headers.get('location');
+      if (redirectUrl) {
+        console.log('[Applink] Redirect location:', redirectUrl);
+        return redirectUrl;
+      }
+    }
+
+    // If no redirect header, try following redirects automatically
+    const followResponse = await fetch(applinkUrl, {
+      method: 'GET',
+      redirect: 'follow',
+    });
+
+    // Return the final URL after all redirects
+    return followResponse.url;
+  } catch (error) {
+    console.error('[Applink] Error resolving redirect:', error);
+    // If redirect resolution fails, return the original URL and let parseShareLink handle it
+    return applinkUrl;
   }
 }
 
