@@ -14,6 +14,15 @@ const nextConfig = {
   },
   // Vercel handles output directory automatically
   // output: 'standalone',
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'www.ikea.com',
+        pathname: '/**',
+      },
+    ],
+  },
 };
 
 const plugins = [

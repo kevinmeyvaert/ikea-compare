@@ -1,6 +1,8 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics, Analytics } from "firebase/analytics";
+import { getFirestore, Firestore, enableIndexedDbPersistence } from "firebase/firestore";
+import { getAuth, Auth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -16,10 +18,26 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Analytics only in browser environment
+// Initialize services only in browser environment
 let analytics: Analytics | null = null;
+let db: Firestore | null = null;
+let auth: Auth | null = null;
+
 if (typeof window !== 'undefined') {
   analytics = getAnalytics(app);
+  db = getFirestore(app);
+  auth = getAuth(app);
+
+  // Enable offline persistence for Firestore
+  if (db) {
+    enableIndexedDbPersistence(db).catch((err) => {
+      if (err.code === 'failed-precondition') {
+        console.warn('Firestore persistence failed: Multiple tabs open');
+      } else if (err.code === 'unimplemented') {
+        console.warn('Firestore persistence not available in this browser');
+      }
+    });
+  }
 }
 
-export { app, analytics };
+export { app, analytics, db, auth };

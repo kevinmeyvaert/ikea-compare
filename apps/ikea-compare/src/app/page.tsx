@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { logEvent } from 'firebase/analytics';
 import { analytics } from '../lib/firebase';
+import { initializeAnonymousAuth, addToHistory } from '../lib/user-data/user-data-manager';
 import Image from 'next/image';
 import ProductSearch from './components/ProductSearch';
 import ComparisonTable from './components/ComparisonTable';
@@ -12,6 +13,7 @@ import StoreSettingsModal from './components/StoreSettingsModal';
 import PDFUpload from './components/PDFUpload';
 import ShareLinkInput from './components/ShareLinkInput';
 import ShoppingListAnalysis from './components/ShoppingListAnalysis';
+import UserDataSection from './components/UserDataSection';
 import { ProductComparisonResult } from '../lib/scrapers/types';
 import { ShoppingListAnalysis as ShoppingListAnalysisType } from '../lib/shopping-list/types';
 import { getSelectedStore } from '../lib/stores/store-manager';
@@ -32,6 +34,11 @@ function IndexContent() {
   const [error, setError] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [hasLoadedFromUrl, setHasLoadedFromUrl] = useState(false);
+
+  // Initialize anonymous auth on mount
+  useEffect(() => {
+    initializeAnonymousAuth();
+  }, []);
 
   // Handler functions wrapped with useCallback to prevent recreation
   const handleSearch = useCallback(async (productId: string) => {
@@ -97,6 +104,26 @@ function IndexContent() {
           product_id: productId,
           product_name: priceData.products.belgium?.name || priceData.products.netherlands?.name || priceData.products.france?.name || 'Unknown',
         });
+      }
+
+      // Add to history
+      const anyProduct = priceData.products.belgium || priceData.products.netherlands || priceData.products.france;
+      if (anyProduct) {
+        const cheapestCountry = priceData.cheapest?.[0] as 'BE' | 'NL' | 'FR' | undefined;
+        const prices = [
+          priceData.products.belgium?.price,
+          priceData.products.netherlands?.price,
+          priceData.products.france?.price
+        ].filter(p => p !== undefined) as number[];
+        const cheapestPrice = prices.length > 0 ? Math.min(...prices) : undefined;
+
+        addToHistory({
+          productId,
+          name: anyProduct.name,
+          imageUrl: anyProduct.imageUrl || '',
+          cheapestCountry,
+          cheapestPrice,
+        }).catch(err => console.error('Error adding to history:', err));
       }
     } catch (err: any) {
       setError(err.message || 'An error occurred while fetching product data');
@@ -206,7 +233,7 @@ function IndexContent() {
     <div className="min-h-screen bg-gray-50">
       <div className="flex flex-col lg:flex-row min-h-screen">
         {/* Left Sidebar */}
-        <aside className="lg:w-96 bg-white border-r border-gray-200 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
+        <aside className="lg:w-[28rem] bg-white border-r border-gray-200 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
           <div className="p-6 flex flex-col min-h-full">
             <div className="flex-1">
             {/* Header */}
@@ -299,6 +326,9 @@ function IndexContent() {
                 />
               )}
             </div>
+
+            {/* User Data Section (History & Favorites) - Only show in single product mode */}
+            {mode === 'single' && <UserDataSection onProductClick={handleSearch} />}
             </div>
 
             {/* Footer - pushed to bottom */}

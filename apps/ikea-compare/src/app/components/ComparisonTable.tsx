@@ -3,6 +3,7 @@
 import { memo } from 'react';
 import { ProductComparisonResult, ProductData } from '../../lib/scrapers/types';
 import Image from 'next/image';
+import FavoriteButton from './FavoriteButton';
 
 interface ComparisonTableProps {
   result: ProductComparisonResult;
@@ -169,9 +170,18 @@ const ComparisonTable = memo(function ComparisonTable({ result }: ComparisonTabl
               <h2 className="text-xl font-semibold text-gray-900 mb-2">
                 {anyProduct.name}
               </h2>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 mb-3">
                 Productcode: <span className="font-mono font-medium">{result.productId}</span>
               </p>
+              <FavoriteButton
+                productData={{
+                  productId: result.productId,
+                  name: anyProduct.name,
+                  imageUrl: anyProduct.imageUrl || '',
+                  cheapestCountry: cheapest?.[0] as 'BE' | 'NL' | 'FR' | undefined,
+                  cheapestPrice: minPrice,
+                }}
+              />
             </div>
           </div>
         </div>
