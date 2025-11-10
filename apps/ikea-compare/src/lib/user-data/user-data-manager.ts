@@ -9,8 +9,6 @@ import {
   limit,
   getDocs,
   Timestamp,
-  QuerySnapshot,
-  DocumentData,
 } from 'firebase/firestore';
 import { signInAnonymously, onAuthStateChanged, User } from 'firebase/auth';
 import { db, auth } from '../firebase';
@@ -29,9 +27,10 @@ export async function initializeAnonymousAuth(): Promise<User | null> {
   }
 
   console.log('[Auth] Initializing anonymous authentication...');
+  const authInstance = auth; // Store in a const to help TypeScript understand it's not null
   return new Promise((resolve) => {
     // Check if user is already signed in
-    onAuthStateChanged(auth, async (user) => {
+    onAuthStateChanged(authInstance, async (user) => {
       if (user) {
         console.log('[Auth] User already signed in:', user.uid);
         currentUser = user;
@@ -40,7 +39,7 @@ export async function initializeAnonymousAuth(): Promise<User | null> {
         // Sign in anonymously if not already signed in
         console.log('[Auth] No user found, signing in anonymously...');
         try {
-          const userCredential = await signInAnonymously(auth);
+          const userCredential = await signInAnonymously(authInstance);
           currentUser = userCredential.user;
           console.log('[Auth] Anonymous sign-in successful:', currentUser.uid);
           resolve(userCredential.user);

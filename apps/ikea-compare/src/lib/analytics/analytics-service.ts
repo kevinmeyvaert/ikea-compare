@@ -1,8 +1,6 @@
 import {
   doc,
-  updateDoc,
   increment,
-  setDoc,
   serverTimestamp,
   writeBatch,
   getDoc,
@@ -18,6 +16,10 @@ export async function trackProductComparison(
   result: ProductComparisonResult
 ): Promise<void> {
   try {
+    if (!db) {
+      console.warn('Firestore not initialized, skipping analytics tracking');
+      return;
+    }
     const batch = writeBatch(db);
 
     // Get all available products with their countries
@@ -148,6 +150,10 @@ export async function trackShoppingListComparison(
   analysis: ShoppingListAnalysis
 ): Promise<void> {
   try {
+    if (!db) {
+      console.warn('Firestore not initialized, skipping analytics tracking');
+      return;
+    }
     const batch = writeBatch(db);
 
     // Deduplicate products - only track unique products for analytics
@@ -315,6 +321,13 @@ export async function trackShoppingListComparison(
  */
 export async function getGlobalStats() {
   try {
+    if (!db) {
+      return {
+        totalComparisons: 0,
+        totalSavings: 0,
+        lastUpdated: null,
+      };
+    }
     const globalStatsRef = doc(db, 'analytics', 'global-stats');
     const snapshot = await getDoc(globalStatsRef);
 
