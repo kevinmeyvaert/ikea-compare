@@ -3,15 +3,15 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { logEvent } from 'firebase/analytics';
-import { analytics } from '../../lib/firebase';
-import { initializeAnonymousAuth } from '../../lib/user-data/user-data-manager';
-import { migrateLocalStorageToFirestore } from '../../lib/stores/store-manager';
-import { trackShoppingListComparison } from '../../lib/analytics/analytics-service';
+import { analytics } from '@ikea-compare/firebase';
+import { initializeAnonymousAuth } from '@ikea-compare/firebase';
+import { migrateLocalStorageToFirestore } from '@ikea-compare/firebase';
+import { trackShoppingListComparison } from '@ikea-compare/firebase';
 import Sidebar from '../components/Sidebar';
 import PDFUpload from '../components/PDFUpload';
 import ShoppingListAnalysis from '../components/ShoppingListAnalysis';
 import StatsCard from '../components/StatsCard';
-import { ShoppingListAnalysis as ShoppingListAnalysisType } from '../../lib/shopping-list/types';
+import { ShoppingListAnalysis as ShoppingListAnalysisType } from '@ikea-compare/firebase';
 
 export default function UploadPage() {
   const router = useRouter();

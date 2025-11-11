@@ -3,17 +3,17 @@
 import { useState, useCallback, useEffect, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { logEvent } from 'firebase/analytics';
-import { analytics } from '../../../lib/firebase';
-import { initializeAnonymousAuth, addToHistory } from '../../../lib/user-data/user-data-manager';
-import { migrateLocalStorageToFirestore, getSelectedStore } from '../../../lib/stores/store-manager';
-import { trackProductComparison } from '../../../lib/analytics/analytics-service';
+import { analytics } from '@ikea-compare/firebase';
+import { initializeAnonymousAuth, addToHistory } from '@ikea-compare/firebase';
+import { migrateLocalStorageToFirestore, getSelectedStore } from '@ikea-compare/firebase';
+import { trackProductComparison } from '@ikea-compare/firebase';
 import Sidebar from '../../components/Sidebar';
 import ProductSearch from '../../components/ProductSearch';
 import ComparisonTable from '../../components/ComparisonTable';
 import LoadingState from '../../components/LoadingState';
 import StatsCard from '../../components/StatsCard';
 import UserDataSection from '../../components/UserDataSection';
-import { ProductComparisonResult } from '../../../lib/scrapers/types';
+import { ProductComparisonResult } from '@ikea-compare/firebase';
 
 function ProductContent() {
   const params = useParams();

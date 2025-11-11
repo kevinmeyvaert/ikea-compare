@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
-import { initializeAnonymousAuth } from '../lib/user-data/user-data-manager';
-import { migrateLocalStorageToFirestore } from '../lib/stores/store-manager';
+import { initializeAnonymousAuth } from '@ikea-compare/firebase';
+import { migrateLocalStorageToFirestore } from '@ikea-compare/firebase';
 import Sidebar from './components/Sidebar';
 import ProductSearch from './components/ProductSearch';
 import StatsCard from './components/StatsCard';

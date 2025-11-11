@@ -1,16 +1,4 @@
-import { IkeaStore, StorePreferences } from './types';
-import {
-  doc,
-  getDoc,
-  setDoc,
-  Timestamp,
-} from 'firebase/firestore';
-import { db } from '../firebase';
-import { getCurrentUserId } from '../user-data/user-data-manager';
-
-// Storage key for localStorage
-const STORAGE_KEY = 'ikea-store-preferences';
-const MIGRATION_KEY = 'ikea-store-preferences-migrated';
+import { IkeaStore, StorePreferences } from '@ikea-compare/types';
 
 /**
  * Get list of IKEA stores for a specific country
@@ -112,20 +100,6 @@ export function getAllStores(): IkeaStore[] {
 }
 
 /**
- * Get saved store preferences (now using Firestore)
- */
-export async function getStorePreferences(): Promise<StorePreferences> {
-  return await getStorePreferencesFromFirestore();
-}
-
-/**
- * Save store preferences (now using Firestore)
- */
-export async function saveStorePreferences(preferences: StorePreferences): Promise<void> {
-  return await saveStorePreferencesToFirestore(preferences);
-}
-
-/**
  * Default store codes for each country
  */
 const DEFAULT_STORES = {
@@ -138,135 +112,18 @@ const DEFAULT_STORES = {
 /**
  * Get selected store for a specific country
  * Returns default store if no preference is saved
+ * Note: For Chrome extension, this will need to use chrome.storage API
  */
-export async function getSelectedStore(countryCode: 'BE' | 'NL' | 'FR' | 'DE'): Promise<IkeaStore | null> {
-  const preferences = await getStorePreferences();
-  let buCode = preferences[countryCode.toLowerCase() as keyof StorePreferences];
-
-  // If no preference is saved, use default and save it
-  if (!buCode) {
-    buCode = DEFAULT_STORES[countryCode];
-    await setSelectedStore(countryCode, buCode);
-  }
-
+export function getSelectedStoreSync(countryCode: 'BE' | 'NL' | 'FR' | 'DE'): IkeaStore {
+  const buCode = DEFAULT_STORES[countryCode];
   const stores = getStoresByCountry(countryCode);
-  return stores.find(store => store.buCode === buCode) || null;
+  return stores.find(store => store.buCode === buCode) || stores[0];
 }
 
 /**
- * Set selected store for a specific country
+ * Get store by buCode
  */
-export async function setSelectedStore(countryCode: 'BE' | 'NL' | 'FR' | 'DE', buCode: string): Promise<void> {
-  const preferences = await getStorePreferences();
-  preferences[countryCode.toLowerCase() as keyof StorePreferences] = buCode;
-  await saveStorePreferences(preferences);
-}
-
-/**
- * Clear all store preferences
- */
-export function clearStorePreferences(): void {
-  if (typeof window === 'undefined') return;
-  localStorage.removeItem(STORAGE_KEY);
-}
-
-// ==================== FIRESTORE FUNCTIONS ====================
-
-/**
- * Get store preferences from Firestore
- */
-export async function getStorePreferencesFromFirestore(): Promise<StorePreferences> {
-  const userId = getCurrentUserId();
-  if (!db || !userId) {
-    return {};
-  }
-
-  try {
-    const docRef = doc(db, 'storePreferences', userId);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      return data.preferences || {};
-    } else {
-      // Return default stores for new users
-      return {
-        be: DEFAULT_STORES.BE,
-        nl: DEFAULT_STORES.NL,
-        fr: DEFAULT_STORES.FR,
-        de: DEFAULT_STORES.DE,
-      };
-    }
-  } catch (error) {
-    console.error('[StorePreferences] Failed to load from Firestore:', error);
-    return {};
-  }
-}
-
-/**
- * Save store preferences to Firestore
- */
-export async function saveStorePreferencesToFirestore(
-  preferences: StorePreferences
-): Promise<void> {
-  const userId = getCurrentUserId();
-  if (!db || !userId) {
-    throw new Error('Firebase not initialized or user not authenticated');
-  }
-
-  try {
-    const docRef = doc(db, 'storePreferences', userId);
-    await setDoc(docRef, {
-      userId,
-      preferences,
-      updatedAt: Timestamp.now(),
-    });
-  } catch (error) {
-    console.error('[StorePreferences] Failed to save to Firestore:', error);
-    throw error;
-  }
-}
-
-/**
- * Migrate store preferences from localStorage to Firestore
- * This is a one-time migration that runs on first load
- */
-export async function migrateLocalStorageToFirestore(): Promise<void> {
-  const userId = getCurrentUserId();
-  if (typeof window === 'undefined' || !db || !userId) {
-    return;
-  }
-
-  // Check if migration has already been done
-  const migrationComplete = localStorage.getItem(MIGRATION_KEY);
-  if (migrationComplete === 'true') {
-    return;
-  }
-
-  try {
-    // Check if there's existing data in localStorage
-    const localData = localStorage.getItem(STORAGE_KEY);
-    if (!localData) {
-      localStorage.setItem(MIGRATION_KEY, 'true');
-      return;
-    }
-
-    const preferences: StorePreferences = JSON.parse(localData);
-
-    // Check if Firestore already has preferences (in case migration was interrupted)
-    const docRef = doc(db, 'storePreferences', userId);
-    const docSnap = await getDoc(docRef);
-
-    if (!docSnap.exists()) {
-      // Only migrate if Firestore doesn't have data yet
-      await saveStorePreferencesToFirestore(preferences);
-    }
-
-    // Clear localStorage after successful migration
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.setItem(MIGRATION_KEY, 'true');
-  } catch (error) {
-    console.error('[StorePreferences] Migration failed:', error);
-    // Don't throw - we don't want to break the app if migration fails
-  }
+export function getStoreByBuCode(buCode: string): IkeaStore | null {
+  const allStores = getAllStores();
+  return allStores.find(store => store.buCode === buCode) || null;
 }

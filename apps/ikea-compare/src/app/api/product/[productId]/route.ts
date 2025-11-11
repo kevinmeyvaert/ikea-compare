@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { scrapeIkeaProduct, isScraperError } from '../../../../lib/scrapers/ikea-scraper';
-import { ProductComparisonResult } from '../../../../lib/scrapers/types';
+import { ProductComparisonResult } from '@ikea-compare/firebase';
 
 export async function GET(
   request: NextRequest,

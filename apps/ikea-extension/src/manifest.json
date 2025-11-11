@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "KOMPRÅRE",
+  "description": "Vergelijk IKEA productprijzen in België, Nederland, Frankrijk en Duitsland",
+  "version": "1.0.0",
+  "action": {
+    "default_icon": {
+      "16": "assets/icon16.png",
+      "32": "assets/icon32.png",
+      "48": "assets/icon48.png",
+      "128": "assets/icon128.png"
+    },
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "16": "assets/icon16.png",
+    "32": "assets/icon32.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.ikea.com/be/*/p/*",
+        "https://www.ikea.com/nl/*/p/*",
+        "https://www.ikea.com/fr/*/p/*",
+        "https://www.ikea.com/de/*/p/*"
+      ],
+      "js": ["ikea-extension.content_script.js"],
+      "css": []
+    }
+  ],
+  "background": {
+    "service_worker": "sw.js"
+  },
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://www.ikea.com/*",
+    "https://api.ingka.ikea.com/*",
+    "https://*.firebaseio.com/*",
+    "https://*.googleapis.com/*",
+    "https://firestore.googleapis.com/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/logo.png"],
+      "matches": ["*://www.ikea.com/*"]
+    }
+  ]
+}

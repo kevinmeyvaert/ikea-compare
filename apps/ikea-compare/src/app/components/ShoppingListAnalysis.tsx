@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo, memo } from 'react';
-import { ShoppingListAnalysis } from '../../lib/shopping-list/types';
-import { getSelectedStore } from '../../lib/stores/store-manager';
+import { ShoppingListAnalysis } from '@ikea-compare/firebase';
+import { getSelectedStore } from '@ikea-compare/firebase';
 import Image from 'next/image';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';

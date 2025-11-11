@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { StoreAvailability } from '../../../../lib/stores/types';
-import { getStoresByCountry } from '../../../../lib/stores/store-manager';
+import { StoreAvailability } from '@ikea-compare/firebase';
+import { getStoresByCountry } from '@ikea-compare/firebase';
 
 export async function GET(
   request: NextRequest,

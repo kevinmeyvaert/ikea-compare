@@ -1,4 +1,4 @@
-import { ProductData } from '../scrapers/types';
+import { ProductData } from '@ikea-compare/firebase';
 
 export interface ShoppingListProduct {
   productId: string;

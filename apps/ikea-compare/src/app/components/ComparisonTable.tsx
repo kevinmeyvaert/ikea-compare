@@ -1,7 +1,7 @@
 'use client';
 
 import { memo } from 'react';
-import { ProductComparisonResult, ProductData } from '../../lib/scrapers/types';
+import { ProductComparisonResult, ProductData } from '@ikea-compare/firebase';
 import Image from 'next/image';
 import FavoriteButton from './FavoriteButton';
 

@@ -1,0 +1,17 @@
+# IkeaExtension
+
+## Working with your extension
+
+### Load your extension locally
+
+To load an unpacked extension in developer mode, follow the steps in [Development Basics](https://developer.chrome.com/docs/extensions/get-started/tutorial/hello-world#load-unpacked).
+
+## See also
+
+[Chrome Extension Icon Generator](https://alexleybourne.github.io/chrome-extension-icon-generator/)
+
+[Chrome Extension Icons Generator](https://www.chromeextensionimages.com/)
+
+[Configure extension icons  |  Chrome Extensions  |  Chrome for Developers](https://developer.chrome.com/docs/extensions/develop/ui/configure-icons)
+
+[Icon Generator - Chrome Web Store](https://chromewebstore.google.com/detail/icon-generator/iakcaohfiocglhldcddchfmfdbjioone)

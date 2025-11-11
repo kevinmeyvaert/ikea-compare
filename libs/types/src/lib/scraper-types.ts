@@ -1,4 +1,4 @@
-import { StoreAvailability } from '../stores/types';
+import { StoreAvailability } from './store-types';
 
 export interface ProductData {
   productId: string;

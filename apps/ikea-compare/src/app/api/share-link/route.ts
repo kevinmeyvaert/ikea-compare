@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ShoppingListAnalysis, ShoppingListProduct, StoreTotal, MultiStoreStrategy } from '../../../lib/shopping-list/types';
-import { ProductComparisonResult } from '../../../lib/scrapers/types';
+import { ShoppingListAnalysis, ShoppingListProduct, StoreTotal, MultiStoreStrategy } from '@ikea-compare/firebase';
+import { ProductComparisonResult } from '@ikea-compare/firebase';
 
 export async function POST(request: NextRequest) {
   try {

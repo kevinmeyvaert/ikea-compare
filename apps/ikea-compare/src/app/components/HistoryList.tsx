@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { getHistory, clearHistory } from '../../lib/user-data/user-data-manager';
-import { HistoryEntry } from '../../lib/user-data/types';
-import { useAuth } from '../../lib/user-data/useAuth';
+import { getHistory, clearHistory } from '@ikea-compare/firebase';
+import { HistoryEntry } from '@ikea-compare/firebase';
+import { useAuth } from '@ikea-compare/firebase';
 
 interface HistoryListProps {
   onProductClick: (productId: string) => void;

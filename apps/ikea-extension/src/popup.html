@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KOMPRÅRE - Winkel Instellingen</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <img src="assets/logo.png" alt="KOMPRÅRE" class="logo" />
+        <h1>Winkel Instellingen</h1>
+      </div>
+
+      <!-- Loading State -->
+      <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Laden...</p>
+      </div>
+
+      <!-- Store Selectors -->
+      <div id="store-selectors" class="store-selectors" style="display: none;">
+        <!-- Belgium -->
+        <div class="country-section">
+          <div class="country-header">
+            <span class="flag">🇧🇪</span>
+            <span class="country-name">België</span>
+          </div>
+          <select id="store-be" class="store-select">
+            <option value="">Selecteer winkel...</option>
+          </select>
+        </div>
+
+        <!-- Netherlands -->
+        <div class="country-section">
+          <div class="country-header">
+            <span class="flag">🇳🇱</span>
+            <span class="country-name">Nederland</span>
+          </div>
+          <select id="store-nl" class="store-select">
+            <option value="">Selecteer winkel...</option>
+          </select>
+        </div>
+
+        <!-- France -->
+        <div class="country-section">
+          <div class="country-header">
+            <span class="flag">🇫🇷</span>
+            <span class="country-name">Frankrijk</span>
+          </div>
+          <select id="store-fr" class="store-select">
+            <option value="">Selecteer winkel...</option>
+          </select>
+        </div>
+
+        <!-- Germany -->
+        <div class="country-section">
+          <div class="country-header">
+            <span class="flag">🇩🇪</span>
+            <span class="country-name">Duitsland</span>
+          </div>
+          <select id="store-de" class="store-select">
+            <option value="">Selecteer winkel...</option>
+          </select>
+        </div>
+
+        <!-- Save Button -->
+        <button id="save-btn" class="save-btn">Opslaan</button>
+
+        <!-- Success Message -->
+        <div id="success-message" class="success-message" style="display: none;">
+          ✓ Instellingen opgeslagen!
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

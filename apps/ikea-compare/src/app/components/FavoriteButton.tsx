@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { addFavorite, removeFavorite, isFavorite } from '../../lib/user-data/user-data-manager';
-import { ProductData } from '../../lib/user-data/types';
+import { addFavorite, removeFavorite, isFavorite } from '@ikea-compare/firebase';
+import { FavoriteProductData } from '@ikea-compare/firebase';
 
 interface FavoriteButtonProps {
-  productData: ProductData;
+  productData: FavoriteProductData;
   className?: string;
 }
 

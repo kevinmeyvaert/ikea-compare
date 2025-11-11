@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { getFavorites, removeFavorite } from '../../lib/user-data/user-data-manager';
-import { FavoriteProduct } from '../../lib/user-data/types';
-import { useAuth } from '../../lib/user-data/useAuth';
+import { getFavorites, removeFavorite } from '@ikea-compare/firebase';
+import { FavoriteProduct } from '@ikea-compare/firebase';
+import { useAuth } from '@ikea-compare/firebase';
 
 interface FavoritesListProps {
   onProductClick: (productId: string) => void;

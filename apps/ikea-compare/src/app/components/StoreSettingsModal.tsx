@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import StoreSelector from './StoreSelector';
-import { getStoresByCountry, getSelectedStore, setSelectedStore } from '../../lib/stores/store-manager';
-import { IkeaStore } from '../../lib/stores/types';
+import { getStoresByCountry, getSelectedStore, setSelectedStore } from '@ikea-compare/firebase';
+import { IkeaStore } from '@ikea-compare/firebase';
 
 interface StoreSettingsModalProps {
   isOpen: boolean;

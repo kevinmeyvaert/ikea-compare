@@ -4,23 +4,28 @@ import {
   serverTimestamp,
   writeBatch,
   getDoc,
+  Firestore,
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import type { ProductComparisonResult } from '../scrapers/types';
-import type { ShoppingListAnalysis } from '../shopping-list/types';
+import type { ProductComparisonResult } from '../types/product-types';
+import type { ShoppingListAnalysis } from '../types/shopping-list-types';
 
 /**
  * Track a single product comparison
+ * @param result - The product comparison result
+ * @param firestoreDb - Optional Firestore instance (for Chrome extension use)
  */
 export async function trackProductComparison(
-  result: ProductComparisonResult
+  result: ProductComparisonResult,
+  firestoreDb?: Firestore
 ): Promise<void> {
   try {
-    if (!db) {
+    const dbInstance = firestoreDb || db;
+    if (!dbInstance) {
       console.warn('Firestore not initialized, skipping analytics tracking');
       return;
     }
-    const batch = writeBatch(db);
+    const batch = writeBatch(dbInstance);
 
     // Get all available products with their countries
     const availableProducts = Object.entries(result.products)
@@ -45,7 +50,7 @@ export async function trackProductComparison(
       .map(p => p.country);
 
     // Update global stats
-    const globalStatsRef = doc(db, 'analytics', 'global-stats');
+    const globalStatsRef = doc(dbInstance, 'analytics', 'global-stats');
     batch.set(
       globalStatsRef,
       {
@@ -61,7 +66,7 @@ export async function trackProductComparison(
     const productImage = availableProducts[0].data.imageUrl;
     const countriesCompared = availableProducts.map(p => p.country);
 
-    const productStatsRef = doc(db, 'product-stats', result.productId);
+    const productStatsRef = doc(dbInstance, 'product-stats', result.productId);
     const productStatsSnapshot = await getDoc(productStatsRef);
     const currentMaxDiff = productStatsSnapshot.exists()
       ? productStatsSnapshot.data().maxPriceDifference || 0
@@ -101,7 +106,7 @@ export async function trackProductComparison(
                           country === 'netherlands' ? 'NL' :
                           country === 'france' ? 'FR' : 'DE';
 
-      const countryStatsRef = doc(db, 'country-stats', countryCode);
+      const countryStatsRef = doc(dbInstance, 'country-stats', countryCode);
 
       // Calculate price difference vs Belgium (reference country)
       const belgiumPrice = result.products.belgium?.price;
@@ -124,7 +129,7 @@ export async function trackProductComparison(
     const allCountries = ['belgium', 'netherlands', 'france', 'germany'];
     const availableInAllCountries = allCountries.every(c => result.products[c as keyof typeof result.products] !== null);
 
-    const availabilityStatsRef = doc(db, 'product-availability-stats', result.productId);
+    const availabilityStatsRef = doc(dbInstance, 'product-availability-stats', result.productId);
     batch.set(
       availabilityStatsRef,
       {

@@ -5,6 +5,18 @@
   "references": [
     {
       "path": "./apps/ikea-compare"
+    },
+    {
+      "path": "./libs/scrapers"
+    },
+    {
+      "path": "./libs/stores"
+    },
+    {
+      "path": "./libs/types"
+    },
+    {
+      "path": "./libs/firebase"
     }
   ]
 }

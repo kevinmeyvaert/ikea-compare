@@ -29,7 +29,7 @@ export interface HistoryEntry {
 /**
  * Data required to add a product to favorites or history
  */
-export interface ProductData {
+export interface FavoriteProductData {
   productId: string;
   name: string;
   imageUrl: string;

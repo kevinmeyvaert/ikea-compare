@@ -1,0 +1,82 @@
+{
+  "name": "ikea-extension",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/ikea-extension/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "webpackConfig": "apps/ikea-extension/webpack.config.js",
+        "target": "web",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/ikea-extension",
+        "main": "apps/ikea-extension/src/main.ts",
+        "outputFileName": "main.js",
+        "additionalEntryPoints": [
+          {
+            "entryName": "options",
+            "entryPath": "apps/ikea-extension/src/options.ts"
+          },
+          {
+            "entryName": "sw",
+            "entryPath": "apps/ikea-extension/src/scripts/sw.ts"
+          },
+          {
+            "entryName": "ikea-extension.content_script",
+            "entryPath": "apps/ikea-extension/src/scripts/ikea-extension.content_script.ts"
+          },
+          {
+            "entryName": "popup",
+            "entryPath": "apps/ikea-extension/src/popup.ts"
+          }
+        ],
+        "tsConfig": "apps/ikea-extension/tsconfig.app.json",
+        "assets": [
+          {
+            "glob": "**/*.*",
+            "input": "apps/ikea-extension/src/assets",
+            "output": "assets"
+          },
+          {
+            "glob": "**/*.json",
+            "input": "apps/ikea-extension/src",
+            "output": "."
+          }
+        ],
+        "generateIndexHtml": false
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "inspect": false,
+          "fileReplacements": [
+            {
+              "replace": "apps/ikea-extension/src/environments/environment.ts",
+              "with": "apps/ikea-extension/src/environments/environment.prod.ts"
+            }
+          ]
+        }
+      }
+    },
+    "zip": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/ikea-extension-v1.0.0.zip"],
+      "dependsOn": ["build:production"],
+      "options": {
+        "command": "cd dist/apps/ikea-extension && zip -r ../../../ikea-extension-v1.0.0.zip . && cd ../../.. && echo 'Zip created: ikea-extension-v1.0.0.zip'"
+      }
+    },
+    "package": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/ikea-extension-v1.0.0.zip"],
+      "dependsOn": ["build:production"],
+      "options": {
+        "command": "cd dist/apps/ikea-extension && zip -r ../../../ikea-extension-v1.0.0.zip . && cd ../../.. && echo 'Package created: ikea-extension-v1.0.0.zip'"
+      }
+    }
+  }
+}

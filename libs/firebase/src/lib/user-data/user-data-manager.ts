@@ -9,10 +9,11 @@ import {
   limit,
   getDocs,
   Timestamp,
+  Firestore,
 } from 'firebase/firestore';
-import { signInAnonymously, onAuthStateChanged, User } from 'firebase/auth';
+import { signInAnonymously, onAuthStateChanged, User, Auth } from 'firebase/auth';
 import { db, auth } from '../firebase';
-import { FavoriteProduct, HistoryEntry, ProductData } from './types';
+import { FavoriteProduct, HistoryEntry, FavoriteProductData } from '../types/user-data-types';
 
 let currentUser: User | null = null;
 
@@ -66,7 +67,7 @@ export function getCurrentUserId(): string | null {
 /**
  * Add a product to favorites
  */
-export async function addFavorite(productData: ProductData): Promise<void> {
+export async function addFavorite(productData: FavoriteProductData): Promise<void> {
   if (!db || !currentUser) {
     throw new Error('Firebase not initialized or user not authenticated');
   }
@@ -80,7 +81,7 @@ export async function addFavorite(productData: ProductData): Promise<void> {
 
   const favoritesRef = collection(db, 'favorites');
   await addDoc(favoritesRef, {
-    userId: currentUser.uid,
+    userId: getCurrentUserId() || "",
     productId: productData.productId,
     name: productData.name,
     imageUrl: productData.imageUrl,
@@ -99,7 +100,7 @@ export async function removeFavorite(productId: string): Promise<void> {
   const favoritesRef = collection(db, 'favorites');
   const q = query(
     favoritesRef,
-    where('userId', '==', currentUser.uid),
+    where('userId', '==', getCurrentUserId()),
     where('productId', '==', productId)
   );
 
@@ -122,7 +123,7 @@ export async function isFavorite(productId: string): Promise<boolean> {
   const favoritesRef = collection(db, 'favorites');
   const q = query(
     favoritesRef,
-    where('userId', '==', currentUser.uid),
+    where('userId', '==', getCurrentUserId()),
     where('productId', '==', productId),
     limit(1)
   );
@@ -145,7 +146,7 @@ export async function getFavorites(): Promise<FavoriteProduct[]> {
   const favoritesRef = collection(db, 'favorites');
   const q = query(
     favoritesRef,
-    where('userId', '==', currentUser.uid),
+    where('userId', '==', getCurrentUserId()),
     orderBy('addedAt', 'desc'),
     limit(50) // Limit to 50 favorites
   );
@@ -164,13 +165,23 @@ export async function getFavorites(): Promise<FavoriteProduct[]> {
 /**
  * Add a search to history
  * If the product was searched recently (within 24h), update the timestamp instead of creating a new entry
+ * @param productData - The product data to add to history
+ * @param firestoreDb - Optional Firestore instance (for Chrome extension use)
+ * @param authInstance - Optional Auth instance (for Chrome extension use)
  */
-export async function addToHistory(productData: ProductData): Promise<void> {
-  if (!db || !currentUser) {
+export async function addToHistory(
+  productData: FavoriteProductData,
+  firestoreDb?: Firestore,
+  authInstance?: Auth
+): Promise<void> {
+  const dbInstance = firestoreDb || db;
+  const authUser = authInstance?.currentUser || currentUser;
+
+  if (!dbInstance || !authUser) {
     throw new Error('Firebase not initialized or user not authenticated');
   }
 
-  const historyRef = collection(db, 'history');
+  const historyRef = collection(dbInstance, 'history');
 
   // Check if product was searched recently (last 24 hours)
   const oneDayAgo = new Date();
@@ -178,7 +189,7 @@ export async function addToHistory(productData: ProductData): Promise<void> {
 
   const recentQuery = query(
     historyRef,
-    where('userId', '==', currentUser.uid),
+    where('userId', '==', authUser.uid),
     where('productId', '==', productData.productId),
     where('searchedAt', '>=', Timestamp.fromDate(oneDayAgo))
   );
@@ -188,13 +199,13 @@ export async function addToHistory(productData: ProductData): Promise<void> {
   if (!recentSnapshot.empty) {
     // Update existing entry's timestamp
     const docToUpdate = recentSnapshot.docs[0];
-    const docRef = doc(db, 'history', docToUpdate.id);
+    const docRef = doc(dbInstance, 'history', docToUpdate.id);
     await deleteDoc(docRef);
   }
 
   // Add new entry
   await addDoc(historyRef, {
-    userId: currentUser.uid,
+    userId: authUser.uid,
     productId: productData.productId,
     name: productData.name,
     imageUrl: productData.imageUrl,
@@ -218,7 +229,7 @@ export async function getHistory(limitCount: number = 20): Promise<HistoryEntry[
   const historyRef = collection(db, 'history');
   const q = query(
     historyRef,
-    where('userId', '==', currentUser.uid),
+    where('userId', '==', getCurrentUserId()),
     orderBy('searchedAt', 'desc'),
     limit(limitCount)
   );
@@ -241,7 +252,7 @@ export async function clearHistory(): Promise<void> {
   }
 
   const historyRef = collection(db, 'history');
-  const q = query(historyRef, where('userId', '==', currentUser.uid));
+  const q = query(historyRef, where('userId', '==', getCurrentUserId()));
 
   const querySnapshot = await getDocs(q);
   const deletePromises = querySnapshot.docs.map((document) =>

@@ -3,16 +3,16 @@
 import { useState, useCallback, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { logEvent } from 'firebase/analytics';
-import { analytics } from '../../lib/firebase';
-import { initializeAnonymousAuth } from '../../lib/user-data/user-data-manager';
-import { migrateLocalStorageToFirestore } from '../../lib/stores/store-manager';
-import { trackShoppingListComparison } from '../../lib/analytics/analytics-service';
+import { analytics } from '@ikea-compare/firebase';
+import { initializeAnonymousAuth } from '@ikea-compare/firebase';
+import { migrateLocalStorageToFirestore } from '@ikea-compare/firebase';
+import { trackShoppingListComparison } from '@ikea-compare/firebase';
 import Sidebar from '../components/Sidebar';
 import ShareLinkInput from '../components/ShareLinkInput';
 import ShoppingListAnalysis from '../components/ShoppingListAnalysis';
 import LoadingState from '../components/LoadingState';
 import StatsCard from '../components/StatsCard';
-import { ShoppingListAnalysis as ShoppingListAnalysisType } from '../../lib/shopping-list/types';
+import { ShoppingListAnalysis as ShoppingListAnalysisType } from '@ikea-compare/firebase';
 
 function ShareContent() {
   const searchParams = useSearchParams();

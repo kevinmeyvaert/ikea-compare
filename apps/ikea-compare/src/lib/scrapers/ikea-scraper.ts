@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import { ProductData, ScraperError } from './types';
+import { ProductData, ScraperError } from '@ikea-compare/firebase';
 
 const COUNTRY_CONFIGS = {
   BE: {

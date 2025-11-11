@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { IkeaStore } from '../../lib/stores/types';
+import { IkeaStore } from '@ikea-compare/firebase';
 
 interface StoreSelectorProps {
   countryCode: 'BE' | 'NL' | 'FR' | 'DE';
