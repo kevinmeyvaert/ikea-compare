@@ -1,0 +1,32 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2017",
+    "module": "ES2020",
+    "moduleResolution": "bundler",
+    "sourceMap": false,
+    "declaration": false,
+    "declarationMap": false,
+    "composite": false,
+    "emitDeclarationOnly": false
+  },
+  "files": [],
+  "include": [],
+  "references": [
+    {
+      "path": "../../libs/scrapers"
+    },
+    {
+      "path": "../../libs/types"
+    },
+    {
+      "path": "../../libs/firebase"
+    },
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
+}

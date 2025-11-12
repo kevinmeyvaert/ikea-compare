@@ -1,0 +1,26 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/out-tsc"
+  },
+  "exclude": [
+    "jest.config.ts",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "jest.config.cts",
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts"
+  ],
+  "include": ["**/*.ts"],
+  "references": [
+    {
+      "path": "../../libs/scrapers/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/types/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/firebase/tsconfig.lib.json"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+//@ts-check
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { composePlugins, withNx } = require('@nx/next');
+
+/**
+ * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
+ **/
+const nextConfig = {
+  // Use this to set Nx-specific options
+  // See: https://nx.dev/recipes/next/next-config-setup
+  nx: {
+    svgr: false,
+  },
+  // Vercel handles output directory automatically
+  // output: 'standalone',
+  transpilePackages: ['@ikea-compare/scrapers', '@ikea-compare/types', '@ikea-compare/firebase'],
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'www.ikea.com',
+        pathname: '/**',
+      },
+    ],
+  },
+};
+
+const plugins = [
+  // Add more Next.js plugins to this list if needed.
+  withNx,
+];
+
+module.exports = composePlugins(...plugins)(nextConfig);

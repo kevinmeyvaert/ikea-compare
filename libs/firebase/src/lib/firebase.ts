@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp, FirebaseApp } from "firebase/app";
-import { getAnalytics, Analytics } from "firebase/analytics";
+import { getAnalytics, Analytics, logEvent as firebaseLogEvent } from "firebase/analytics";
 import { getFirestore, Firestore, enableIndexedDbPersistence } from "firebase/firestore";
 import { getAuth, Auth } from "firebase/auth";
 
@@ -13,6 +13,11 @@ export interface FirebaseConfig {
   messagingSenderId: string;
   appId: string;
   measurementId: string;
+}
+
+// Firebase initialization options
+export interface FirebaseInitOptions {
+  enableAnalytics?: boolean;
 }
 
 // Your web app's Firebase configuration
@@ -34,21 +39,75 @@ let analytics: Analytics | null = null;
 let db: Firestore | null = null;
 let auth: Auth | null = null;
 
-if (typeof window !== 'undefined') {
-  analytics = getAnalytics(app);
-  db = getFirestore(app);
-  auth = getAuth(app);
+// Track if Firebase services have been initialized
+let isInitialized = false;
 
-  // Enable offline persistence for Firestore
-  if (db) {
-    enableIndexedDbPersistence(db).catch((err) => {
-      if (err.code === 'failed-precondition') {
-        console.warn('Firestore persistence failed: Multiple tabs open');
-      } else if (err.code === 'unimplemented') {
-        console.warn('Firestore persistence not available in this browser');
-      }
-    });
+/**
+ * Initialize Firebase services with optional analytics
+ * Call this once at app startup
+ */
+export function initializeFirebaseServices(options: FirebaseInitOptions = {}) {
+  if (isInitialized) {
+    console.warn('Firebase services already initialized');
+    return;
   }
+
+  if (typeof window !== 'undefined') {
+    // Only initialize analytics if explicitly enabled
+    if (options.enableAnalytics) {
+      try {
+        analytics = getAnalytics(app);
+        console.log('[Firebase] Analytics enabled');
+      } catch (error) {
+        console.warn('[Firebase] Failed to initialize analytics:', error);
+      }
+    } else {
+      console.log('[Firebase] Analytics disabled');
+    }
+
+    db = getFirestore(app);
+    auth = getAuth(app);
+
+    // Enable offline persistence for Firestore
+    if (db) {
+      enableIndexedDbPersistence(db).catch((err) => {
+        if (err.code === 'failed-precondition') {
+          console.warn('Firestore persistence failed: Multiple tabs open');
+        } else if (err.code === 'unimplemented') {
+          console.warn('Firestore persistence not available in this browser');
+        }
+      });
+    }
+
+    isInitialized = true;
+  }
+}
+
+/**
+ * Safe analytics event logging
+ * Only logs if analytics is enabled, otherwise silently ignores
+ */
+export function logAnalyticsEvent(eventName: string, eventParams?: Record<string, any>) {
+  if (analytics) {
+    try {
+      firebaseLogEvent(analytics, eventName, eventParams);
+    } catch (error) {
+      console.warn('[Firebase] Failed to log analytics event:', error);
+    }
+  }
+}
+
+/**
+ * Check if analytics is available
+ */
+export function isAnalyticsEnabled(): boolean {
+  return analytics !== null;
+}
+
+// Auto-initialize for backward compatibility (with analytics disabled by default)
+// This allows existing code to work, but analytics must be explicitly enabled
+if (typeof window !== 'undefined' && !isInitialized) {
+  initializeFirebaseServices({ enableAnalytics: false });
 }
 
 export { app, analytics, db, auth, firebaseConfig };

@@ -1,0 +1,82 @@
+{
+  "name": "@ikea-compare/komprare-chrome-extension",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/komprare-chrome-extension/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "webpackConfig": "apps/komprare-chrome-extension/webpack.config.js",
+        "target": "web",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/komprare-chrome-extension",
+        "main": "apps/komprare-chrome-extension/src/main.ts",
+        "outputFileName": "main.js",
+        "additionalEntryPoints": [
+          {
+            "entryName": "options",
+            "entryPath": "apps/komprare-chrome-extension/src/options.ts"
+          },
+          {
+            "entryName": "sw",
+            "entryPath": "apps/komprare-chrome-extension/src/scripts/sw.ts"
+          },
+          {
+            "entryName": "ikea-extension.content_script",
+            "entryPath": "apps/komprare-chrome-extension/src/scripts/ikea-extension.content_script.ts"
+          },
+          {
+            "entryName": "popup",
+            "entryPath": "apps/komprare-chrome-extension/src/popup.ts"
+          }
+        ],
+        "tsConfig": "apps/komprare-chrome-extension/tsconfig.app.json",
+        "assets": [
+          {
+            "glob": "**/*.*",
+            "input": "apps/komprare-chrome-extension/src/assets",
+            "output": "assets"
+          },
+          {
+            "glob": "**/*.json",
+            "input": "apps/komprare-chrome-extension/src",
+            "output": "."
+          }
+        ],
+        "generateIndexHtml": false
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "inspect": false,
+          "fileReplacements": [
+            {
+              "replace": "apps/komprare-chrome-extension/src/environments/environment.ts",
+              "with": "apps/komprare-chrome-extension/src/environments/environment.prod.ts"
+            }
+          ]
+        }
+      }
+    },
+    "zip": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/ikea-extension-v1.0.0.zip"],
+      "dependsOn": ["build:production"],
+      "options": {
+        "command": "cd dist/apps/komprare-chrome-extension && zip -r ../../../ikea-extension-v1.0.0.zip . && cd ../../.. && echo 'Zip created: ikea-extension-v1.0.0.zip'"
+      }
+    },
+    "package": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/ikea-extension-v1.0.0.zip"],
+      "dependsOn": ["build:production"],
+      "options": {
+        "command": "cd dist/apps/komprare-chrome-extension && zip -r ../../../ikea-extension-v1.0.0.zip . && cd ../../.. && echo 'Package created: ikea-extension-v1.0.0.zip'"
+      }
+    }
+  }
+}
