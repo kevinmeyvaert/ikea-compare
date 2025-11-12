@@ -1,101 +1,203 @@
-# IkeaCompare
+<div align="center">
+  <img src="apps/komprare-web/public/assets/logo.png" alt="KOMPRÅRE Logo" width="400">
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+  # KOMPRÅRE
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+  **Altijd de juiste GRÄBPRIS** ✨
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/next?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+  Compare IKEA prices across Belgium, Netherlands, France, and Germany in real-time.
 
-## Run tasks
+  [![Next.js](https://img.shields.io/badge/Next.js-15.2.5-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+  [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+  [![Nx](https://img.shields.io/badge/Nx-22.0.2-143055?style=for-the-badge&logo=nx)](https://nx.dev/)
+  [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.3-06B6D4?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
+  [![Firebase](https://img.shields.io/badge/Firebase-12.5.0-FFCA28?style=for-the-badge&logo=firebase)](https://firebase.google.com/)
 
-To run the dev server for your app, use:
+  [Demo](https://komprare.vercel.app) • [Chrome Extension](#) • [Report Bug](https://github.com/kevinmeyvaert/ikea-compare/issues)
 
-```sh
-npx nx dev ikea-compare
+</div>
+
+---
+
+## 🎯 Features
+
+- 🔍 **Single Product Comparison** - Compare prices for any IKEA product across 4 countries
+- 📄 **PDF Upload** - Upload your IKEA shopping list PDF and get instant price comparisons
+- 🔗 **Share Link Import** - Paste IKEA share links to compare entire shopping carts
+- 🏪 **Store Selection** - Choose your preferred IKEA store for accurate availability
+- 📊 **Real-time Statistics** - Track total savings and comparison metrics
+- 💾 **Search History** - Access your recent product searches
+- ⭐ **Favorites** - Save products for quick access
+- 🌐 **Multi-platform** - Available as web app and Chrome extension
+- 📱 **Responsive Design** - Works seamlessly on desktop and mobile
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 20.x or later
+- npm or yarn
+- Firebase account (for full functionality)
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/kevinmeyvaert/ikea-compare.git
+cd ikea-compare
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp apps/komprare-web/.env.example apps/komprare-web/.env.local
+# Edit .env.local with your Firebase credentials
+
+# Start the development server
+npx nx dev komprare-web
 ```
 
-To create a production bundle:
+The web app will be available at [http://localhost:3000](http://localhost:3000)
 
-```sh
-npx nx build ikea-compare
+## 🏗️ Project Structure
+
+This is an Nx monorepo with the following structure:
+
+```
+ikea-compare/
+├── apps/
+│   ├── komprare-web/              # Next.js web application
+│   └── komprare-chrome-extension/ # Chrome extension
+└── libs/
+    ├── types/                      # Shared TypeScript types
+    ├── scrapers/                   # IKEA scraping logic
+    └── firebase/                   # Firebase integration
 ```
 
-To see all available targets to run for a project, run:
+## 🛠️ Development
 
-```sh
-npx nx show project ikea-compare
+### Web Application
+
+```bash
+# Start development server
+npx nx dev komprare-web
+
+# Build for production
+npx nx build komprare-web
+
+# Lint code
+npx nx lint komprare-web
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+### Chrome Extension
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+```bash
+# Build extension (development)
+npx nx build komprare-chrome-extension
 
-## Add new projects
+# Build for production
+npx nx build komprare-chrome-extension --prod
 
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
-
-Use the plugin's generator to create new projects.
-
-To generate a new application, use:
-
-```sh
-npx nx g @nx/next:app demo
+# Create distributable zip
+npx nx package komprare-chrome-extension
 ```
 
-To generate a new library, use:
+### Working with Libraries
 
-```sh
-npx nx g @nx/react:lib mylib
+```bash
+# Build a specific library
+npx nx build types
+npx nx build scrapers
+npx nx build firebase
+
+# Type check
+npx nx typecheck types
+
+# Lint library
+npx nx lint scrapers
 ```
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+## 🌍 Supported Countries
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+| Country       | Code | Stores Supported |
+|--------------|------|------------------|
+| 🇧🇪 Belgium      | BE   | 9 stores         |
+| 🇳🇱 Netherlands  | NL   | 15 stores        |
+| 🇫🇷 France       | FR   | 37 stores        |
+| 🇩🇪 Germany      | DE   | 60 stores        |
 
-## Set up CI!
+## 📦 Tech Stack
 
-### Step 1
+### Frontend
+- **Next.js 15.2.5** - React framework with App Router
+- **React 19** - UI library
+- **TypeScript 5.9** - Type safety
+- **Tailwind CSS 3.4.3** - Styling
 
-To connect to Nx Cloud, run the following command:
+### Backend & Services
+- **Firebase 12.5.0** - Authentication, Firestore, Analytics
+- **Axios & Cheerio** - Web scraping
 
-```sh
-npx nx connect
-```
+### Build & Development
+- **Nx 22.0.2** - Monorepo management
+- **Webpack** - Chrome extension bundling
+- **ESLint** - Code linting
+- **PostCSS & Autoprefixer** - CSS processing
 
-Connecting to Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
+## 🎨 Key Features Explained
 
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### PDF Upload
+Upload your IKEA shopping list PDF directly to get instant price comparisons for all items. The app automatically extracts product codes and fetches current prices.
 
-### Step 2
+### Share Link Support
+Copy a share link from the IKEA website or mobile app and paste it into KOMPRÅRE to see price differences across countries:
+- `https://www.ikea.com/be/nl/favourites/receive-share/...`
+- `https://applink.ikea.com/...`
 
-Use the following command to configure a CI workflow for your workspace:
+### Store Selection
+Choose your preferred IKEA store in each country to see accurate stock availability and pickup options.
 
-```sh
-npx nx g ci-workflow
-```
+### Chrome Extension
+Browse IKEA websites and get real-time price comparisons overlaid on the page without leaving the site.
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## 📊 Analytics & Privacy
 
-## Install Nx Console
+- Anonymous authentication via Firebase
+- Usage analytics to improve the service
+- No personal data collection beyond anonymous usage patterns
+- Store preferences saved locally and synced to your anonymous account
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+## 🤝 Contributing
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Useful links
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-Learn more:
+## 📝 License
 
-- [Learn more about this workspace setup](https://nx.dev/nx-api/next?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+This project is licensed under the MIT License.
 
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## 👨‍💻 Author
+
+**Kevin Meyvaert**
+- Website: [kevinmeyvaert.be](https://kevinmeyvaert.be)
+- GitHub: [@kevinmeyvaert](https://github.com/kevinmeyvaert)
+
+## 🙏 Acknowledgments
+
+- IKEA for their product data
+- The Nx team for the amazing monorepo tools
+- Vercel for hosting
+
+---
+
+<div align="center">
+  Made with ❤️ in Belgium
+
+  **KOMPRÅRE** - Because nobody should overpay for a BILLY bookcase
+</div>

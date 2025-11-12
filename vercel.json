@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npx nx build ikea-compare --prod",
+  "buildCommand": "cd ../.. && npx nx build komprare-web --prod",
   "outputDirectory": ".next",
-  "ignoreCommand": "npx nx-ignore ikea-compare"
+  "ignoreCommand": "cd ../.. && npx nx-ignore komprare-web",
+  "installCommand": "cd ../.. && npm install"
 }
