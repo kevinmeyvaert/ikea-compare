@@ -14,15 +14,27 @@ interface CountryCardProps {
   countryCode: 'BE' | 'NL' | 'FR' | 'DE';
   product: ProductData | null;
   isCheapest: boolean;
+  belgiumPrice?: number;
 }
 
-function CountryCard({ country, countryCode, product, isCheapest }: CountryCardProps) {
+function CountryCard({ country, countryCode, product, isCheapest, belgiumPrice }: CountryCardProps) {
   const countryFlags = {
     BE: '🇧🇪',
     NL: '🇳🇱',
     FR: '🇫🇷',
     DE: '🇩🇪',
   };
+
+  // Calculate percentage difference with Belgium
+  const calculatePercentageDiff = () => {
+    if (!product?.price || !belgiumPrice || countryCode === 'BE') {
+      return null;
+    }
+    const diff = ((product.price - belgiumPrice) / belgiumPrice) * 100;
+    return diff;
+  };
+
+  const percentageDiff = calculatePercentageDiff();
 
   if (!product) {
     return (
@@ -62,6 +74,17 @@ function CountryCard({ country, countryCode, product, isCheapest }: CountryCardP
           <div className="text-2xl font-semibold text-gray-900">
             {product.currency} {Number(product.price).toFixed(2)}
           </div>
+
+          {/* Percentage difference with Belgium */}
+          {percentageDiff !== null && (
+            <div className={`text-sm font-medium mt-2 ${
+              percentageDiff < 0 ? 'text-green-600' : 'text-red-600'
+            }`}>
+              {percentageDiff < 0
+                ? `${Math.abs(percentageDiff).toFixed(1)}% goedkoper dan België`
+                : `${percentageDiff.toFixed(1)}% duurder dan België`}
+            </div>
+          )}
 
           {/* Store availability information */}
           {product.storeAvailability ? (
@@ -226,24 +249,28 @@ const ComparisonTable = memo(function ComparisonTable({ result }: ComparisonTabl
           countryCode="BE"
           product={products.belgium}
           isCheapest={cheapest?.includes('BE') ?? false}
+          belgiumPrice={products.belgium?.price}
         />
         <CountryCard
           country="Nederland"
           countryCode="NL"
           product={products.netherlands}
           isCheapest={cheapest?.includes('NL') ?? false}
+          belgiumPrice={products.belgium?.price}
         />
         <CountryCard
           country="Frankrijk"
           countryCode="FR"
           product={products.france}
           isCheapest={cheapest?.includes('FR') ?? false}
+          belgiumPrice={products.belgium?.price}
         />
         <CountryCard
           country="Duitsland"
           countryCode="DE"
           product={products.germany}
           isCheapest={cheapest?.includes('DE') ?? false}
+          belgiumPrice={products.belgium?.price}
         />
       </div>
     </div>
