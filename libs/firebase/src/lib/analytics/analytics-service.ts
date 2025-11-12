@@ -7,7 +7,7 @@ import {
   Firestore,
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import type { ProductComparisonResult } from '../types/product-types';
+import type { ProductComparisonResult } from '@ikea-compare/types';
 import type { ShoppingListAnalysis } from '../types/shopping-list-types';
 
 /**

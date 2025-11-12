@@ -1,4 +1,4 @@
-import { IkeaStore, StorePreferences } from '../types/store-types';
+import { IkeaStore, StorePreferences } from '@ikea-compare/types';
 import {
   doc,
   getDoc,

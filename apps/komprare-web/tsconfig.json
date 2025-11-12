@@ -23,7 +23,6 @@
       "@ikea-compare/firebase": ["../../libs/firebase/src/index.ts"]
     },
     "outDir": "dist",
-    "rootDir": "src",
     "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
   },
   "include": [
