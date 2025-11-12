@@ -32,7 +32,7 @@
 - 🌐 **Multi-platform** - Available as web app and Chrome extension
 - 📱 **Responsive Design** - Works seamlessly on desktop and mobile
 
-## 🚀 Quick Start
+## 🚀 Quick start
 
 ### Prerequisites
 
