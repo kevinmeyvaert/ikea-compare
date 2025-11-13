@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth } from '../firebase';
+import { onAuthStateChanged, User, auth } from '../firebase';
 
 /**
  * Custom hook to track Firebase auth state

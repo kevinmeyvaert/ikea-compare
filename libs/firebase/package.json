@@ -11,6 +11,11 @@
       "import": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./extension": {
+      "types": "./src/extension.ts",
+      "import": "./src/extension.ts",
+      "default": "./src/extension.ts"
+    },
     "./package.json": "./package.json"
   },
   "dependencies": {}

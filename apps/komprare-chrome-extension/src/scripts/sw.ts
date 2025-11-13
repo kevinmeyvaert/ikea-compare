@@ -1,13 +1,14 @@
 // Background service worker for IKEA Price Compare Extension
 // Handles fetching product data from different countries
-import { db, auth } from '../lib/firebase-extension';
-import { signInAnonymously } from 'firebase/auth';
 import {
+  db,
+  auth,
+  signInAnonymously,
   trackProductComparison,
   addToHistory,
   getSelectedStore,
   getStoresByCountry,
-} from '@ikea-compare/firebase';
+} from '@ikea-compare/firebase/extension';
 import { type StoreAvailability } from '@ikea-compare/types';
 import { scrapeIkeaProduct, isScraperError } from '@ikea-compare/scrapers';
 

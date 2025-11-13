@@ -11,8 +11,7 @@ import {
   Timestamp,
   Firestore,
 } from 'firebase/firestore';
-import { signInAnonymously, onAuthStateChanged, User, Auth } from 'firebase/auth';
-import { db, auth } from '../firebase';
+import { signInAnonymously, onAuthStateChanged, User, Auth, db, auth } from '../firebase';
 import { FavoriteProduct, HistoryEntry, FavoriteProductData } from '../types/user-data-types';
 
 let currentUser: User | null = null;

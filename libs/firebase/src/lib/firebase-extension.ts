@@ -1,16 +1,14 @@
 /**
- * Firebase module for web applications
- * Uses firebase/auth which contains remote code references
- * For Chrome extensions, use '@ikea-compare/firebase/extension' instead
+ * Firebase module for Chrome extensions
+ * Uses firebase/auth/web-extension which is Chrome Web Store compliant
+ * Does NOT contain remote code references
  */
-import { Auth } from "firebase/auth";
+import { Auth } from "firebase/auth/web-extension";
 import {
   app,
   db as coreDb,
-  analytics as coreAnalytics,
   firebaseConfig,
   initializeFirestore,
-  initializeAnalytics,
   logAnalyticsEvent as coreLogAnalyticsEvent,
   isAnalyticsEnabled as coreIsAnalyticsEnabled,
 } from './firebase-core';
@@ -19,7 +17,7 @@ import {
   signInAnonymously,
   onAuthStateChanged,
   type User,
-} from './auth/auth-web';
+} from './auth/auth-extension';
 
 // Re-export types and config
 export type { FirebaseConfig } from './firebase-core';
@@ -29,11 +27,11 @@ export { signInAnonymously, onAuthStateChanged, type User, type Auth };
 
 // Firebase initialization options
 export interface FirebaseInitOptions {
-  enableAnalytics?: boolean;
+  enableAnalytics?: boolean; // Note: Analytics not supported in extensions
 }
 
 // Initialize services only in browser environment
-let analytics = coreAnalytics;
+let analytics = null; // Analytics not supported in Chrome extensions
 let db = coreDb;
 let auth: Auth | null = null;
 
@@ -41,8 +39,8 @@ let auth: Auth | null = null;
 let isInitialized = false;
 
 /**
- * Initialize Firebase services with optional analytics
- * Call this once at app startup
+ * Initialize Firebase services for Chrome extension
+ * Analytics is not supported in extensions and will be disabled
  */
 export function initializeFirebaseServices(options: FirebaseInitOptions = {}) {
   if (isInitialized) {
@@ -50,36 +48,29 @@ export function initializeFirebaseServices(options: FirebaseInitOptions = {}) {
     return;
   }
 
-  if (typeof window !== 'undefined') {
-    // Only initialize analytics if explicitly enabled
+  if (typeof window !== 'undefined' || typeof chrome !== 'undefined') {
+    // Analytics not supported in extensions
     if (options.enableAnalytics) {
-      try {
-        analytics = initializeAnalytics();
-        console.log('[Firebase] Analytics enabled');
-      } catch (error) {
-        console.warn('[Firebase] Failed to initialize analytics:', error);
-      }
-    } else {
-      console.log('[Firebase] Analytics disabled');
+      console.warn('[Firebase Extension] Analytics is not supported in Chrome extensions');
     }
 
     // Initialize Firestore
     db = initializeFirestore();
 
-    // Initialize Auth (web version)
+    // Initialize Auth (extension version)
     auth = initializeAuth(app);
 
     isInitialized = true;
+    console.log('[Firebase Extension] Services initialized (analytics disabled)');
   }
 }
 
-// Re-export analytics functions from core
+// Re-export analytics functions from core (no-op in extensions)
 export const logAnalyticsEvent = coreLogAnalyticsEvent;
 export const isAnalyticsEnabled = coreIsAnalyticsEnabled;
 
-// Auto-initialize for backward compatibility (with analytics disabled by default)
-// This allows existing code to work, but analytics must be explicitly enabled
-if (typeof window !== 'undefined' && !isInitialized) {
+// Auto-initialize for backward compatibility
+if ((typeof window !== 'undefined' || typeof chrome !== 'undefined') && !isInitialized) {
   initializeFirebaseServices({ enableAnalytics: false });
 }
 

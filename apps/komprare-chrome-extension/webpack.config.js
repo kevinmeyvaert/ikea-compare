@@ -19,6 +19,8 @@ module.exports = composePlugins(
     config.resolve.alias = config.resolve.alias || {};
     config.resolve.alias['@ikea-compare/scrapers'] = path.resolve(__dirname, '../../libs/scrapers/src/index.ts');
     config.resolve.alias['@ikea-compare/types'] = path.resolve(__dirname, '../../libs/types/src/index.ts');
+    config.resolve.alias['@ikea-compare/firebase/extension'] = path.resolve(__dirname, '../../libs/firebase/src/extension.ts');
+    config.resolve.alias['@ikea-compare/firebase'] = path.resolve(__dirname, '../../libs/firebase/src/index.ts');
 
     const plugins = ['popup', 'options'].map(
       (s) =>

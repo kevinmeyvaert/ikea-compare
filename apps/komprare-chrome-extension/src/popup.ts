@@ -1,11 +1,12 @@
 // KOMPRÅRE Extension Popup - Store Settings
-import { db, auth } from './lib/firebase-extension';
-import { signInAnonymously } from 'firebase/auth';
 import {
+  db,
+  auth,
+  signInAnonymously,
   getStoresByCountry,
   getStorePreferences,
   setSelectedStore,
-} from '@ikea-compare/firebase';
+} from '@ikea-compare/firebase/extension';
 import './popup.scss';
 
 // UI Elements
