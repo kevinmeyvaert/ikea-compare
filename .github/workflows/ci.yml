@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+# Cancel previous runs on the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Main CI job that runs affected tests, linting, and builds
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for Nx affected commands
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set up Nx SHAs
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Run affected linting
+        run: npx nx affected --target=lint --parallel=3
+
+      - name: Run affected type checking
+        run: npx nx affected --target=typecheck --parallel=3
+        continue-on-error: true # Type checking may not be configured for all projects
+
+      - name: Run affected tests
+        run: npx nx affected --target=test --parallel=3 --ci --coverage
+
+      - name: Upload test coverage
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          directory: ./coverage
+          fail_ci_if_error: false
+        continue-on-error: true
+
+      - name: Run affected builds
+        run: npx nx affected --target=build --parallel=3
+
+      - name: Check for uncommitted changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "Error: Uncommitted changes detected after build"
+            git status --porcelain
+            exit 1
+          fi
+
+  # Summary job that checks if all required jobs passed
+  ci-success:
+    name: CI Success
+    runs-on: ubuntu-latest
+    needs: [ci]
+    if: always()
+
+    steps:
+      - name: Check CI status
+        run: |
+          if [ "${{ needs.ci.result }}" != "success" ]; then
+            echo "CI failed"
+            exit 1
+          fi
+          echo "All CI checks passed!"

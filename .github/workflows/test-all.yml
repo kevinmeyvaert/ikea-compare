@@ -1,0 +1,51 @@
+name: Test All
+
+# Manual workflow to run all tests in the monorepo
+# Useful for comprehensive testing before major releases
+
+on:
+  workflow_dispatch: # Manual trigger only
+  schedule:
+    # Run all tests weekly on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+
+jobs:
+  test-all:
+    name: Run All Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run all tests
+        run: npx nx run-many --target=test --all --parallel=3 --ci --coverage
+
+      - name: Upload test coverage
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          directory: ./coverage
+          fail_ci_if_error: false
+        continue-on-error: true
+
+      - name: Test summary
+        if: always()
+        run: |
+          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "All tests have been executed across the entire monorepo." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Projects tested:**" >> $GITHUB_STEP_SUMMARY
+          echo "- @ikea-compare/firebase" >> $GITHUB_STEP_SUMMARY
+          echo "- @ikea-compare/scrapers" >> $GITHUB_STEP_SUMMARY
+          echo "- @ikea-compare/komprare-web" >> $GITHUB_STEP_SUMMARY
+          echo "- @ikea-compare/komprare-chrome-extension" >> $GITHUB_STEP_SUMMARY
