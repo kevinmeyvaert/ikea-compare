@@ -28,7 +28,7 @@ export async function measureExecutionTime<T>(
 export async function benchmark<T>(
   fn: () => Promise<T>,
   thresholdMs: number,
-  description: string = 'Operation'
+  description = 'Operation'
 ): Promise<BenchmarkResult> {
   const { duration } = await measureExecutionTime(fn);
   const withinThreshold = duration <= thresholdMs;
@@ -87,7 +87,7 @@ export async function runBenchmarks(
  */
 export async function averageExecutionTime<T>(
   fn: () => Promise<T>,
-  runs: number = 10
+  runs = 10
 ): Promise<number> {
   const durations: number[] = [];
 
@@ -105,7 +105,7 @@ export async function averageExecutionTime<T>(
  */
 export async function getPerformanceStats<T>(
   fn: () => Promise<T>,
-  runs: number = 10
+  runs = 10
 ): Promise<{
   min: number;
   max: number;

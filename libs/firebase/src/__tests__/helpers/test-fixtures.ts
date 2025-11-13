@@ -25,7 +25,7 @@ export function createMockProduct(overrides: Partial<ProductData> = {}): Product
 /**
  * Create a set of products for all countries
  */
-export function createMockProductSet(basePrice: number = 89.99) {
+export function createMockProductSet(basePrice = 89.99) {
   return {
     BE: createMockProduct({ country: 'BE', price: basePrice }),
     NL: createMockProduct({ country: 'NL', price: basePrice + 5 }),
@@ -49,7 +49,7 @@ export function createUnavailableProducts() {
 /**
  * Create a mock favorite entry
  */
-export function createMockFavorite(productId: string = '40263850') {
+export function createMockFavorite(productId = '40263850') {
   return {
     productId,
     addedAt: new Date(),
@@ -62,7 +62,7 @@ export function createMockFavorite(productId: string = '40263850') {
  * Create a mock history entry
  */
 export function createMockHistoryEntry(
-  productId: string = '40263850',
+  productId = '40263850',
   timestamp: Date = new Date()
 ) {
   return {
@@ -91,7 +91,7 @@ export function createMockStorePreferences(
 /**
  * Create a mock comparison event for analytics
  */
-export function createMockComparisonEvent(productId: string = '40263850') {
+export function createMockComparisonEvent(productId = '40263850') {
   const products = createMockProductSet();
 
   return {
@@ -181,7 +181,7 @@ export function createMockShoppingListWithUnavailable() {
 /**
  * Create a large shopping list for performance testing
  */
-export function createLargeShoppingList(itemCount: number = 50) {
+export function createLargeShoppingList(itemCount = 50) {
   const items = [];
   for (let i = 0; i < itemCount; i++) {
     items.push({
@@ -196,7 +196,7 @@ export function createLargeShoppingList(itemCount: number = 50) {
 /**
  * Create mock user data
  */
-export function createMockUserData(uid: string = 'test-uid-123') {
+export function createMockUserData(uid = 'test-uid-123') {
   return {
     uid,
     email: null,

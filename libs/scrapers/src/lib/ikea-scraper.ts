@@ -60,7 +60,7 @@ function extractProductData(
         if (jsonData['@type'] === 'Product') {
           productData = jsonData;
         }
-      } catch (e) {
+      } catch {
         // Continue to next script tag
       }
     });
@@ -77,7 +77,7 @@ function extractProductData(
             if (match) {
               productData = JSON.parse(match[1]);
             }
-          } catch (e) {
+          } catch {
             // Continue
           }
         }
@@ -90,7 +90,7 @@ function extractProductData(
               const initialState = JSON.parse(match[1]);
               productData = initialState;
             }
-          } catch (e) {
+          } catch {
             // Continue
           }
         }

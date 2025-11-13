@@ -135,7 +135,7 @@ export default function PDFUpload({
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
 
       <p className="mt-3 text-xs text-gray-600">
-        Deze parser is ontworpen voor pdf's uit de IKEA keukenplanner. Pdf moet
+        Deze parser is ontworpen voor pdf&apos;s uit de IKEA keukenplanner. Pdf moet
         productcodes bevatten (8 cijfers).
       </p>
     </div>

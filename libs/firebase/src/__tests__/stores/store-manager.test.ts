@@ -15,7 +15,7 @@ import { createMockFirestore, createMockAuth, createMockUser, createMockDocument
 import { createMockStorePreferences } from '../helpers/test-fixtures';
 
 // Store mock document references
-let mockDocuments: Map<string, any> = new Map();
+const mockDocuments: Map<string, any> = new Map();
 
 // Mock firebase/firestore functions
 jest.mock('firebase/firestore', () => ({

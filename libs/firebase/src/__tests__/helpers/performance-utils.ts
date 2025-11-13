@@ -40,7 +40,7 @@ export async function expectPerformance<T>(
 export async function benchmarkBatchOperation<T>(
   fn: () => Promise<T>,
   thresholdMs: number,
-  description: string = 'Batch operation'
+  description = 'Batch operation'
 ): Promise<{ result: T; duration: number; passed: boolean }> {
   const { result, duration } = await measureExecutionTime(fn);
   const passed = duration <= thresholdMs;
@@ -59,7 +59,7 @@ export async function benchmarkBatchOperation<T>(
  */
 export async function averageExecutionTime<T>(
   fn: () => Promise<T>,
-  runs: number = 10
+  runs = 10
 ): Promise<number> {
   const durations: number[] = [];
 

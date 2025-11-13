@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   addFavorite,
   removeFavorite,
@@ -20,12 +20,7 @@ export default function FavoriteButton({
   const [isFavorited, setIsFavorited] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check if product is favorited on mount
-  useEffect(() => {
-    checkFavoriteStatus();
-  }, [productData.productId]);
-
-  const checkFavoriteStatus = async () => {
+  const checkFavoriteStatus = useCallback(async () => {
     try {
       const favorited = await isFavorite(productData.productId);
       setIsFavorited(favorited);
@@ -34,7 +29,12 @@ export default function FavoriteButton({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [productData.productId]);
+
+  // Check if product is favorited on mount
+  useEffect(() => {
+    checkFavoriteStatus();
+  }, [checkFavoriteStatus]);
 
   const handleToggleFavorite = async () => {
     try {

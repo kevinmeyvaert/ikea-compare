@@ -72,7 +72,7 @@ jest.mock('firebase/firestore', () => ({
     op,
     value,
   })),
-  orderBy: jest.fn((field: string, direction: string = 'asc') => ({
+  orderBy: jest.fn((field: string, direction = 'asc') => ({
     type: 'orderBy',
     field,
     direction,

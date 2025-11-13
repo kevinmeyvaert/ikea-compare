@@ -31,7 +31,7 @@ export interface FirebaseInitOptions {
 }
 
 // Initialize services only in browser environment
-let analytics = null; // Analytics not supported in Chrome extensions
+const analytics = null; // Analytics not supported in Chrome extensions
 let db = coreDb;
 let auth: Auth | null = null;
 

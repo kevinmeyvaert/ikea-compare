@@ -216,7 +216,7 @@ export async function addToHistory(
 /**
  * Get search history for the current user
  */
-export async function getHistory(limitCount: number = 20): Promise<HistoryEntry[]> {
+export async function getHistory(limitCount = 20): Promise<HistoryEntry[]> {
   console.log('[History] getHistory called with limit:', limitCount);
   if (!db || !currentUser) {
     console.log('[History] No db or currentUser:', { db: !!db, currentUser: !!currentUser });

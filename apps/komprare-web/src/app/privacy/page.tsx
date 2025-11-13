@@ -14,7 +14,7 @@ export default function PrivacyPolicy() {
             1. Inleiding
           </h2>
           <p className="mb-4">
-            KOMPRÅRE ("wij", "ons" of "de extensie") is een browserextensie die
+            KOMPRÅRE (&quot;wij&quot;, &quot;ons&quot; of &quot;de extensie&quot;) is een browserextensie die
             je helpt om IKEA-productprijzen te vergelijken in België, Nederland,
             Frankrijk en Duitsland. We zijn toegewijd aan het beschermen van je
             privacy en willen transparant zijn over de gegevens die we
@@ -42,7 +42,7 @@ export default function PrivacyPolicy() {
             </li>
             <li>
               <strong>Gebruiksstatistieken:</strong> Informatie over welke
-              producten je bekijkt en vergelijkt (product-ID's, tijdstempels)
+              producten je bekijkt en vergelijkt (product-ID&apos;s, tijdstempels)
             </li>
             <li>
               <strong>Technische gegevens:</strong> Browsertype, extensieversie
@@ -191,7 +191,7 @@ export default function PrivacyPolicy() {
           </h2>
           <p className="mb-4">
             We kunnen dit privacybeleid van tijd tot tijd bijwerken. Wanneer we
-            dat doen, werken we de datum "Laatst bijgewerkt" bovenaan deze
+            dat doen, werken we de datum &quot;Laatst bijgewerkt&quot; bovenaan deze
             pagina bij. We raden je aan dit beleid regelmatig te bekijken.
             Voortgezet gebruik van de extensie na wijzigingen betekent dat je
             akkoord gaat met het bijgewerkte beleid.

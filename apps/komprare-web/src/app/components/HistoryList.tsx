@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { getHistory, clearHistory } from '@ikea-compare/firebase';
 import { HistoryEntry } from '@ikea-compare/firebase';
@@ -19,17 +19,7 @@ export default function HistoryList({
   const [isLoading, setIsLoading] = useState(true);
   const isAuthenticated = useAuth();
 
-  useEffect(() => {
-    console.log(
-      '[HistoryList] Auth state or maxItems changed, isAuthenticated:',
-      isAuthenticated
-    );
-    if (isAuthenticated) {
-      loadHistory();
-    }
-  }, [maxItems, isAuthenticated]);
-
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     try {
       console.log(
         '[HistoryList] Starting to load history, maxItems:',
@@ -45,7 +35,17 @@ export default function HistoryList({
       setIsLoading(false);
       console.log('[HistoryList] Loading complete');
     }
-  };
+  }, [maxItems]);
+
+  useEffect(() => {
+    console.log(
+      '[HistoryList] Auth state or maxItems changed, isAuthenticated:',
+      isAuthenticated
+    );
+    if (isAuthenticated) {
+      loadHistory();
+    }
+  }, [isAuthenticated, loadHistory]);
 
   const handleClearHistory = async () => {
     if (!confirm('Weet je zeker dat je de hele geschiedenis wilt wissen?')) {

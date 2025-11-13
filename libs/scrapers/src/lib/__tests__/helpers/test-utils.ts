@@ -52,7 +52,7 @@ export function mockAxiosSuccess(
   mock: MockAdapter,
   url: string,
   html: string,
-  status: number = 200
+  status = 200
 ): void {
   mock.onGet(url).reply(status, html, {
     'content-type': 'text/html; charset=utf-8',
@@ -66,7 +66,7 @@ export function mockAxiosError(
   mock: MockAdapter,
   url: string,
   status: number,
-  message: string = 'Not found'
+  message = 'Not found'
 ): void {
   mock.onGet(url).reply(status, message);
 }
