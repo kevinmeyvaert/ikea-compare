@@ -45,17 +45,6 @@ jobs:
       - name: Run affected tests
         run: npx nx affected --target=test --parallel=3 --ci --coverage
 
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v5
-        if: always()
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: .
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: false
-        continue-on-error: true
-
       - name: Run affected builds
         run: npx nx affected --target=build --parallel=3
 
@@ -66,6 +55,17 @@ jobs:
             git status --porcelain
             exit 1
           fi
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: .
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+        continue-on-error: true
 
   # Summary job that checks if all required jobs passed
   ci-success:

@@ -54,3 +54,8 @@ out
 test-output
 
 /zip
+
+# Codecov uploader (downloaded by CI)
+codecov
+codecov.SHA256SUM
+codecov.SHA256SUM.sig
