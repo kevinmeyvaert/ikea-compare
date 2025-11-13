@@ -30,10 +30,11 @@ jobs:
       - name: Run all tests
         run: npx nx run-many --target=test --all --parallel=3 --ci --coverage
 
-      - name: Upload test coverage
-        uses: codecov/codecov-action@v4
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
         if: always()
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./coverage
           fail_ci_if_error: false
         continue-on-error: true
