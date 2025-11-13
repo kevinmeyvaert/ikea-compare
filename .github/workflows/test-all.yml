@@ -35,7 +35,7 @@ jobs:
         if: always()
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./coverage
+          files: ./libs/scrapers/test-output/jest/coverage/lcov.info,./libs/firebase/test-output/jest/coverage/lcov.info,./apps/komprare-web/test-output/jest/coverage/lcov.info,./apps/komprare-chrome-extension/test-output/jest/coverage/lcov.info
           fail_ci_if_error: false
         continue-on-error: true
 
