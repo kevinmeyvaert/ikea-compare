@@ -183,8 +183,7 @@ export async function addToHistory(
   const historyRef = collection(dbInstance, 'history');
 
   // Check if product was searched recently (last 24 hours)
-  const oneDayAgo = new Date();
-  oneDayAgo.setHours(oneDayAgo.getHours() - 24);
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
   const recentQuery = query(
     historyRef,

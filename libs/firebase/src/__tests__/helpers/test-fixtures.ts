@@ -210,25 +210,19 @@ export function createMockUserData(uid: string = 'test-uid-123') {
  * Helper to create timestamp X hours ago
  */
 export function hoursAgo(hours: number): Date {
-  const date = new Date();
-  date.setHours(date.getHours() - hours);
-  return date;
+  return new Date(Date.now() - hours * 60 * 60 * 1000);
 }
 
 /**
  * Helper to create timestamp X minutes ago
  */
 export function minutesAgo(minutes: number): Date {
-  const date = new Date();
-  date.setMinutes(date.getMinutes() - minutes);
-  return date;
+  return new Date(Date.now() - minutes * 60 * 1000);
 }
 
 /**
  * Helper to create timestamp X days ago
  */
 export function daysAgo(days: number): Date {
-  const date = new Date();
-  date.setDate(date.getDate() - days);
-  return date;
+  return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 }

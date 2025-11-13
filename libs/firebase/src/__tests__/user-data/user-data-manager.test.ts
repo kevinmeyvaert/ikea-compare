@@ -320,19 +320,32 @@ describe('User Data Manager', () => {
         { productId: '333', name: 'Product 3', imageUrl: 'url3' },
       ];
 
-      // Add in sequence (newest last)
-      for (const product of products) {
-        await addFavorite(product);
-        // Small delay to ensure different timestamps
-        await new Promise(resolve => setTimeout(resolve, 10));
+      // Mock Timestamp.now() to return incrementing timestamps
+      const { Timestamp } = require('firebase/firestore');
+      let mockTime = Date.now();
+      const originalTimestampNow = Timestamp.now;
+      Timestamp.now = jest.fn(() => {
+        const timestamp = createMockTimestamp(new Date(mockTime));
+        mockTime += 1000; // Increment by 1 second
+        return timestamp;
+      });
+
+      try {
+        // Add in sequence (newest last)
+        for (const product of products) {
+          await addFavorite(product);
+        }
+
+        const favorites = await getFavorites();
+
+        expect(favorites).toHaveLength(3);
+        // Should be ordered by addedAt desc (newest first)
+        expect(favorites[0].productId).toBe('333'); // Latest
+        expect(favorites[2].productId).toBe('111'); // Oldest
+      } finally {
+        // Restore Timestamp.now
+        Timestamp.now = originalTimestampNow;
       }
-
-      const favorites = await getFavorites();
-
-      expect(favorites).toHaveLength(3);
-      // Should be ordered by addedAt desc (newest first)
-      expect(favorites[0].productId).toBe('333'); // Latest
-      expect(favorites[2].productId).toBe('111'); // Oldest
     });
 
     it('should respect limit parameter in getFavorites', async () => {
@@ -485,23 +498,33 @@ describe('User Data Manager', () => {
         cheapestPrice: 59.99,
       };
 
-      // Add entry exactly 24 hours ago
-      const exactlyOneDayAgo = createMockTimestamp(hoursAgo(24));
-      const { addDoc } = require('firebase/firestore');
-      const originalAddDoc = addDoc.getMockImplementation();
+      // Freeze time to avoid timing drift between calls
+      const fixedNow = Date.now();
+      const originalDateNow = Date.now;
+      Date.now = jest.fn(() => fixedNow);
 
-      addDoc.mockImplementationOnce((collectionRef: any, data: any) => {
-        return originalAddDoc(collectionRef, { ...data, searchedAt: exactlyOneDayAgo });
-      });
+      try {
+        // Add entry exactly 24 hours ago
+        const exactlyOneDayAgo = createMockTimestamp(hoursAgo(24));
+        const { addDoc } = require('firebase/firestore');
+        const originalAddDoc = addDoc.getMockImplementation();
 
-      await addToHistory(productData);
+        addDoc.mockImplementationOnce((collectionRef: any, data: any) => {
+          return originalAddDoc(collectionRef, { ...data, searchedAt: exactlyOneDayAgo });
+        });
 
-      // Add now - should replace because >= 24h ago matches
-      addDoc.mockImplementation(originalAddDoc);
-      await addToHistory(productData);
+        await addToHistory(productData);
 
-      const history = mockCollections.get('history') || [];
-      expect(history).toHaveLength(1);
+        // Add now - should replace because >= 24h ago matches
+        addDoc.mockImplementation(originalAddDoc);
+        await addToHistory(productData);
+
+        const history = mockCollections.get('history') || [];
+        expect(history).toHaveLength(1);
+      } finally {
+        // Restore Date.now
+        Date.now = originalDateNow;
+      }
     });
 
     it('should return history ordered by timestamp desc', async () => {
@@ -529,18 +552,32 @@ describe('User Data Manager', () => {
         },
       ];
 
-      // Add in sequence
-      for (const product of products) {
-        await addToHistory(product);
-        await new Promise(resolve => setTimeout(resolve, 10));
+      // Mock Timestamp.now() to return incrementing timestamps
+      const { Timestamp } = require('firebase/firestore');
+      let mockTime = Date.now();
+      const originalTimestampNow = Timestamp.now;
+      Timestamp.now = jest.fn(() => {
+        const timestamp = createMockTimestamp(new Date(mockTime));
+        mockTime += 1000; // Increment by 1 second
+        return timestamp;
+      });
+
+      try {
+        // Add in sequence
+        for (const product of products) {
+          await addToHistory(product);
+        }
+
+        const history = await getHistory();
+
+        expect(history).toHaveLength(3);
+        // Should be ordered by searchedAt desc (newest first)
+        expect(history[0].productId).toBe('333');
+        expect(history[2].productId).toBe('111');
+      } finally {
+        // Restore Timestamp.now
+        Timestamp.now = originalTimestampNow;
       }
-
-      const history = await getHistory();
-
-      expect(history).toHaveLength(3);
-      // Should be ordered by searchedAt desc (newest first)
-      expect(history[0].productId).toBe('333');
-      expect(history[2].productId).toBe('111');
     });
 
     it('should respect limit parameter in getHistory', async () => {
