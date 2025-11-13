@@ -145,7 +145,7 @@ function createPriceTable(prices: Record<string, PriceData>): HTMLElement {
   container.appendChild(header);
 
   // Price rows (vertical list)
-  const countries: Array<keyof typeof COUNTRY_CONFIGS> = [
+  const countries: Array<keyof typeof COUNTRY_FLAGS> = [
     'BE',
     'NL',
     'FR',
@@ -442,6 +442,7 @@ async function main() {
       // Return true to indicate we'll send response asynchronously
       return true;
     }
+    return false;
   });
 }
 

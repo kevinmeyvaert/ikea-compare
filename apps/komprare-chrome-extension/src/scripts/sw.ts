@@ -22,6 +22,9 @@ async function initializeAuth() {
 
   authPromise = (async () => {
     try {
+      if (!auth) {
+        throw new Error('Auth not initialized');
+      }
       const userCredential = await signInAnonymously(auth);
       console.log(
         '[Firebase SW] Anonymous auth initialized:',
@@ -29,7 +32,7 @@ async function initializeAuth() {
       );
 
       // Verify auth.currentUser is set
-      if (auth.currentUser) {
+      if (auth && auth.currentUser) {
         console.log(
           '[Firebase SW] auth.currentUser confirmed:',
           auth.currentUser.uid
@@ -348,7 +351,7 @@ async function trackProductView(
     };
 
     // Track in Firebase (pass the extension's db instance)
-    await trackProductComparison(comparisonResult, db);
+    await trackProductComparison(comparisonResult, db || undefined);
     console.log('[Firebase SW] Tracked product comparison:', productId);
 
     // Add to history
@@ -360,8 +363,8 @@ async function trackProductView(
         cheapestCountry,
         cheapestPrice,
       },
-      db,
-      auth
+      db || undefined,
+      auth || undefined
     );
     console.log('[Firebase SW] Added to history:', productId);
   } catch (error) {
@@ -390,7 +393,7 @@ async function fetchAllPrices(
   // Ensure auth is initialized before fetching store preferences
   await initializeAuth();
   console.log('[Background] Auth state after init:', {
-    currentUser: auth.currentUser?.uid,
+    currentUser: auth?.currentUser?.uid,
     isInitialized: isAuthInitialized,
   });
 
@@ -415,7 +418,7 @@ async function fetchAllPrices(
     if (!prices[country]) return; // Skip if no price data
 
     try {
-      const selectedStore = await getSelectedStore(country, db, auth);
+      const selectedStore = await getSelectedStore(country, db || undefined, auth || undefined);
       if (!selectedStore) {
         console.log(`[${country}] No store selected, skipping availability`);
         return;
@@ -479,6 +482,7 @@ chrome.runtime.onMessage.addListener(
       // Return true to indicate we'll send response asynchronously
       return true;
     }
+    return false;
   }
 );
 

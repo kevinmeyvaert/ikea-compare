@@ -1,0 +1,15 @@
+{
+  "name": "@ikea-compare/scrapers",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/scrapers/src",
+  "projectType": "library",
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/scrapers"
+      }
+    }
+  }
+}

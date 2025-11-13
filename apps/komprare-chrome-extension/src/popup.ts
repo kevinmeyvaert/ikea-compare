@@ -19,15 +19,15 @@ const storeNL = document.getElementById('store-nl') as HTMLSelectElement;
 const storeFR = document.getElementById('store-fr') as HTMLSelectElement;
 const storeDE = document.getElementById('store-de') as HTMLSelectElement;
 const saveBtn = document.getElementById('save-btn') as HTMLButtonElement;
-const successMessage = document.getElementById(
-  'success-message'
-) as HTMLDivElement;
 
 /**
  * Initialize Firebase authentication
  */
 async function initializeAuth(): Promise<void> {
   try {
+    if (!auth) {
+      throw new Error('Auth not initialized');
+    }
     await signInAnonymously(auth);
     console.log('[Popup] Anonymous auth initialized');
   } catch (error) {
@@ -65,7 +65,7 @@ function populateStoreDropdowns(): void {
  */
 async function loadCurrentPreferences(): Promise<void> {
   try {
-    const preferences = await getStorePreferences(db, auth);
+    const preferences = await getStorePreferences(db || undefined, auth || undefined);
 
     if (preferences.be) storeBE.value = preferences.be;
     if (preferences.nl) storeNL.value = preferences.nl;
@@ -94,7 +94,7 @@ async function savePreferences(): Promise<void> {
 
     for (const { code, buCode } of updates) {
       if (buCode) {
-        await setSelectedStore(code, buCode, db, auth);
+        await setSelectedStore(code, buCode, db || undefined, auth || undefined);
       }
     }
 

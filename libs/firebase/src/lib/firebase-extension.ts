@@ -3,6 +3,10 @@
  * Uses firebase/auth/web-extension which is Chrome Web Store compliant
  * Does NOT contain remote code references
  */
+
+// Declare chrome global for extension environment
+declare const chrome: any;
+
 import { Auth } from "firebase/auth/web-extension";
 import {
   app,

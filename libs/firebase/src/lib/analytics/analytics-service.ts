@@ -8,7 +8,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { ProductComparisonResult } from '@ikea-compare/types';
-import type { ShoppingListAnalysis } from '../types/shopping-list-types';
+import type { ShoppingListAnalysis, ShoppingListProduct } from '../types/shopping-list-types';
 
 /**
  * Track a single product comparison
@@ -183,8 +183,8 @@ export async function trackShoppingListComparison(
     // This ensures savings are always positive or zero and match user expectations
     // IMPORTANT: Use analysis.products (with quantities), not uniqueProducts
     const belgiumTotal = analysis.products
-      .filter(p => p.products.belgium)
-      .reduce((sum, p) => sum + p.products.belgium!.price, 0);
+      .filter((p: ShoppingListProduct) => p.products.belgium)
+      .reduce((sum: number, p: ShoppingListProduct) => sum + p.products.belgium!.price, 0);
 
     const savings = belgiumTotal - analysis.multiStoreStrategy.totalCost;
 

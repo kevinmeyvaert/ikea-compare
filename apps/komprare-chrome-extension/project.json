@@ -5,6 +5,13 @@
   "sourceRoot": "apps/komprare-chrome-extension/src",
   "tags": [],
   "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --build tsconfig.app.json",
+        "cwd": "apps/komprare-chrome-extension"
+      }
+    },
     "build": {
       "executor": "@nx/webpack:webpack",
       "outputs": ["{options.outputPath}"],

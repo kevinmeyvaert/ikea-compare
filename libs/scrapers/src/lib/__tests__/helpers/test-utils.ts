@@ -4,6 +4,8 @@ import MockAdapter from 'axios-mock-adapter';
 import axios from 'axios';
 import type { ProductData, ScraperError } from '@ikea-compare/types';
 
+type MockAdapterType = InstanceType<typeof MockAdapter>;
+
 /**
  * Load an HTML fixture file from the fixtures directory
  */
@@ -49,7 +51,7 @@ export function createMockScraperError(
  * Setup axios mock adapter with a successful response
  */
 export function mockAxiosSuccess(
-  mock: MockAdapter,
+  mock: MockAdapterType,
   url: string,
   html: string,
   status = 200
@@ -63,7 +65,7 @@ export function mockAxiosSuccess(
  * Setup axios mock adapter with an error response
  */
 export function mockAxiosError(
-  mock: MockAdapter,
+  mock: MockAdapterType,
   url: string,
   status: number,
   message = 'Not found'
@@ -75,7 +77,7 @@ export function mockAxiosError(
  * Setup axios mock adapter with a network error
  */
 export function mockAxiosNetworkError(
-  mock: MockAdapter,
+  mock: MockAdapterType,
   url: string
 ): void {
   mock.onGet(url).networkError();
@@ -84,14 +86,14 @@ export function mockAxiosNetworkError(
 /**
  * Setup axios mock adapter with a timeout
  */
-export function mockAxiosTimeout(mock: MockAdapter, url: string): void {
+export function mockAxiosTimeout(mock: MockAdapterType, url: string): void {
   mock.onGet(url).timeout();
 }
 
 /**
  * Create a new axios mock adapter
  */
-export function createAxiosMock(): MockAdapter {
+export function createAxiosMock(): MockAdapterType {
   return new MockAdapter(axios);
 }
 
