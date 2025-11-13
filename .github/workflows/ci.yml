@@ -50,7 +50,9 @@ jobs:
         if: always()
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./libs/scrapers/test-output/jest/coverage/lcov.info,./libs/firebase/test-output/jest/coverage/lcov.info,./apps/komprare-web/test-output/jest/coverage/lcov.info,./apps/komprare-chrome-extension/test-output/jest/coverage/lcov.info
+          directory: .
+          flags: unittests
+          name: codecov-umbrella
           fail_ci_if_error: false
         continue-on-error: true
 
