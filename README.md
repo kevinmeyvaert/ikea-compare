@@ -7,14 +7,28 @@
 
   Compare IKEA prices across Belgium, Netherlands, France, and Germany in real-time.
 
-  [![Next.js](https://img.shields.io/badge/Next.js-15.2.5-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
-  [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
-  [![Nx](https://img.shields.io/badge/Nx-22.0.2-143055?style=for-the-badge&logo=nx)](https://nx.dev/)
-  [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.3-06B6D4?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
-  [![Firebase](https://img.shields.io/badge/Firebase-12.5.0-FFCA28?style=for-the-badge&logo=firebase)](https://firebase.google.com/)
+  <!-- Build & Quality Badges -->
+  [![CI](https://img.shields.io/github/actions/workflow/status/kevinmeyvaert/ikea-compare/ci.yml?branch=main&style=flat-square&logo=github&label=CI&labelColor=2B3137&color=success)](https://github.com/kevinmeyvaert/ikea-compare/actions/workflows/ci.yml)
+  [![Test All](https://img.shields.io/github/actions/workflow/status/kevinmeyvaert/ikea-compare/test-all.yml?style=flat-square&logo=github&label=Tests&labelColor=2B3137&color=success)](https://github.com/kevinmeyvaert/ikea-compare/actions/workflows/test-all.yml)
+  [![Coverage](https://img.shields.io/codecov/c/github/kevinmeyvaert/ikea-compare?style=flat-square&logo=codecov&labelColor=2B3137)](https://codecov.io/gh/kevinmeyvaert/ikea-compare)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square&labelColor=2B3137)](LICENSE)
 
-  [Demo](https://komprare.vercel.app) • [Chrome Extension](#) • [Report Bug](https://github.com/kevinmeyvaert/ikea-compare/issues)
+  <!-- Deployment & Status -->
+  [![Vercel](https://img.shields.io/badge/Deployed-Vercel-black?style=flat-square&logo=vercel&labelColor=2B3137)](https://komprare.vercel.app)
+  [![Maintained](https://img.shields.io/badge/Maintained-Yes-success?style=flat-square&labelColor=2B3137)](https://github.com/kevinmeyvaert/ikea-compare/graphs/commit-activity)
+  [![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-success?style=flat-square&labelColor=2B3137)](https://github.com/kevinmeyvaert/ikea-compare/blob/main/CONTRIBUTING.md)
+
+  <!-- Tech Stack -->
+  [![Next.js](https://img.shields.io/badge/Next.js-15.2.5-black?style=flat-square&logo=next.js&logoColor=white&labelColor=2B3137)](https://nextjs.org/)
+  [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=white&labelColor=2B3137)](https://reactjs.org/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=white&labelColor=2B3137)](https://www.typescriptlang.org/)
+  [![Nx](https://img.shields.io/badge/Nx-22.0.2-143055?style=flat-square&logo=nx&logoColor=white&labelColor=2B3137)](https://nx.dev/)
+  [![Tailwind](https://img.shields.io/badge/Tailwind-3.4.3-06B6D4?style=flat-square&logo=tailwind-css&logoColor=white&labelColor=2B3137)](https://tailwindcss.com/)
+  [![Firebase](https://img.shields.io/badge/Firebase-12.5.0-FFCA28?style=flat-square&logo=firebase&logoColor=white&labelColor=2B3137)](https://firebase.google.com/)
+
+  ---
+
+  [🚀 Demo](https://komprare.vercel.app) • [🔌 Chrome Extension](#) • [🐛 Report Bug](https://github.com/kevinmeyvaert/ikea-compare/issues)
 
 </div>
 
@@ -117,6 +131,41 @@ npx nx typecheck types
 # Lint library
 npx nx lint scrapers
 ```
+
+### Testing
+
+KOMPRÅRE has comprehensive test coverage across all libraries and apps using Jest.
+
+```bash
+# Run tests for a specific project
+npx nx test scrapers
+npx nx test firebase
+npx nx test komprare-web
+
+# Run all tests in the monorepo
+npx nx run-many --target=test --all
+
+# Run tests with coverage
+npx nx test scrapers --coverage
+
+# Run affected tests only (based on git changes)
+npx nx affected --target=test
+
+# Run tests in watch mode
+npx nx test scrapers --watch
+
+# Run tests in CI mode (no watch, with coverage)
+npx nx test scrapers --ci --coverage
+```
+
+**Test Coverage:**
+
+- **`@ikea-compare/scrapers`** - IKEA web scraping logic, product data extraction, error handling
+- **`@ikea-compare/firebase`** - Authentication, store management, user data persistence
+- **`komprare-web`** - API routes for PDF upload, share links, and product availability
+- **`komprare-chrome-extension`** - Extension utilities and helper functions
+
+Coverage reports are automatically uploaded to Codecov on every CI run. View the latest coverage at [codecov.io/gh/kevinmeyvaert/ikea-compare](https://codecov.io/gh/kevinmeyvaert/ikea-compare).
 
 ## 🌍 Supported Countries
 
