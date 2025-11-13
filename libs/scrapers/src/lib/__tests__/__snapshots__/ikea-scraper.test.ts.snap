@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`IKEA Scraper scrapeIkeaProduct - Snapshots should match snapshot for Belgian product 1`] = `
+{
+  "available": true,
+  "country": "BE",
+  "currency": "EUR",
+  "imageUrl": "https://www.ikea.com/be/nl/images/products/billy-boekenkast-wit__0625599_pe692385_s5.jpg",
+  "name": "BILLY boekenkast wit",
+  "price": 89.99,
+  "productId": "40263850",
+  "url": "https://www.ikea.com/be/nl/p/40263850/",
+}
+`;
+
+exports[`IKEA Scraper scrapeIkeaProduct - Snapshots should match snapshot for Dutch product 1`] = `
+{
+  "available": true,
+  "country": "NL",
+  "currency": "EUR",
+  "imageUrl": "https://www.ikea.com/nl/nl/images/products/kallax-stellingkast-wit__0644755_pe702939_s5.jpg",
+  "name": "KALLAX stellingkast wit",
+  "price": 69.99,
+  "productId": "20275885",
+  "url": "https://www.ikea.com/nl/nl/p/20275885/",
+}
+`;
+
+exports[`IKEA Scraper scrapeIkeaProduct - Snapshots should match snapshot for error response 1`] = `
+{
+  "country": "BE",
+  "message": "Product not found",
+  "productId": "99999999",
+}
+`;

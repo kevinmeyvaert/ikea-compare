@@ -125,7 +125,10 @@ function extractProductData(
           }
         }
 
-        imageUrl = productData.image?.[0] || productData.image || '';
+        // Handle both string and array formats for image
+        imageUrl = Array.isArray(productData.image)
+          ? productData.image[0] || ''
+          : productData.image || '';
       }
       // Handle utag_data format
       else if (productData.product_names) {
