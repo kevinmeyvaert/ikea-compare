@@ -1,12 +1,6 @@
 // KOMPRÅRE Extension Popup - Store Settings
-import {
-  db,
-  auth,
-  signInAnonymously,
-  getStoresByCountry,
-  getStorePreferences,
-  setSelectedStore,
-} from '@ikea-compare/firebase/extension';
+import { getStoresByCountry } from './utils/stores';
+import * as ChromeStorage from './services/chrome-storage.service';
 import './popup.scss';
 
 // UI Elements
@@ -19,21 +13,6 @@ const storeNL = document.getElementById('store-nl') as HTMLSelectElement;
 const storeFR = document.getElementById('store-fr') as HTMLSelectElement;
 const storeDE = document.getElementById('store-de') as HTMLSelectElement;
 const saveBtn = document.getElementById('save-btn') as HTMLButtonElement;
-
-/**
- * Initialize Firebase authentication
- */
-async function initializeAuth(): Promise<void> {
-  try {
-    if (!auth) {
-      throw new Error('Auth not initialized');
-    }
-    await signInAnonymously(auth);
-    console.log('[Popup] Anonymous auth initialized');
-  } catch (error) {
-    console.error('[Popup] Auth initialization failed:', error);
-  }
-}
 
 /**
  * Populate store dropdowns
@@ -61,11 +40,11 @@ function populateStoreDropdowns(): void {
 }
 
 /**
- * Load current store preferences
+ * Load current store preferences from Chrome Storage
  */
 async function loadCurrentPreferences(): Promise<void> {
   try {
-    const preferences = await getStorePreferences(db || undefined, auth || undefined);
+    const preferences = await ChromeStorage.getStorePreferences();
 
     if (preferences.be) storeBE.value = preferences.be;
     if (preferences.nl) storeNL.value = preferences.nl;
@@ -77,14 +56,14 @@ async function loadCurrentPreferences(): Promise<void> {
 }
 
 /**
- * Save store preferences
+ * Save store preferences to Chrome Storage
  */
 async function savePreferences(): Promise<void> {
   try {
     saveBtn.disabled = true;
     saveBtn.textContent = 'Opslaan...';
 
-    // Save each country's selected store
+    // Save each country's selected store using Chrome Storage
     const updates = [
       { code: 'BE' as const, buCode: storeBE.value },
       { code: 'NL' as const, buCode: storeNL.value },
@@ -94,7 +73,7 @@ async function savePreferences(): Promise<void> {
 
     for (const { code, buCode } of updates) {
       if (buCode) {
-        await setSelectedStore(code, buCode, db || undefined, auth || undefined);
+        await ChromeStorage.setSelectedStore(code, buCode);
       }
     }
 
@@ -140,13 +119,10 @@ async function savePreferences(): Promise<void> {
  */
 async function initialize(): Promise<void> {
   try {
-    // Initialize Firebase auth
-    await initializeAuth();
-
     // Populate dropdowns with stores
     populateStoreDropdowns();
 
-    // Load current preferences
+    // Load current preferences from Chrome Storage
     await loadCurrentPreferences();
 
     // Show store selectors, hide loading
@@ -155,6 +131,8 @@ async function initialize(): Promise<void> {
 
     // Add save button listener
     saveBtn.addEventListener('click', savePreferences);
+
+    console.log('[Popup] Initialized successfully');
   } catch (error) {
     console.error('[Popup] Initialization failed:', error);
     loadingEl.innerHTML = `

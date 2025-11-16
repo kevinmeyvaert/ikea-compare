@@ -1,58 +1,26 @@
 // Background service worker for IKEA Price Compare Extension
 // Handles fetching product data from different countries
-import {
-  db,
-  auth,
-  signInAnonymously,
-  trackProductComparison,
-  addToHistory,
-  getSelectedStore,
-  getStoresByCountry,
-} from '@ikea-compare/firebase/extension';
 import { type StoreAvailability } from '@ikea-compare/types';
 import { scrapeIkeaProduct, isScraperError } from '@ikea-compare/scrapers';
+import * as ChromeStorage from '../services/chrome-storage.service';
+import { getStoresByCountry } from '../utils/stores';
 
-// Initialize Firebase Anonymous Auth
-let isAuthInitialized = false;
-let authPromise: Promise<void> | null = null;
+// Initialize user ID when service worker starts
+let userId: string | null = null;
 
-async function initializeAuth() {
-  if (isAuthInitialized) return;
-  if (authPromise) return authPromise;
+async function initializeUserId() {
+  if (userId) return;
 
-  authPromise = (async () => {
-    try {
-      if (!auth) {
-        throw new Error('Auth not initialized');
-      }
-      const userCredential = await signInAnonymously(auth);
-      console.log(
-        '[Firebase SW] Anonymous auth initialized:',
-        userCredential.user.uid
-      );
-
-      // Verify auth.currentUser is set
-      if (auth && auth.currentUser) {
-        console.log(
-          '[Firebase SW] auth.currentUser confirmed:',
-          auth.currentUser.uid
-        );
-        isAuthInitialized = true;
-      } else {
-        console.warn('[Firebase SW] auth.currentUser is null after sign in');
-      }
-    } catch (error) {
-      console.error('[Firebase SW] Auth initialization failed:', error);
-    } finally {
-      authPromise = null;
-    }
-  })();
-
-  return authPromise;
+  try {
+    userId = await ChromeStorage.getUserId();
+    console.log('[SW] User ID initialized:', userId);
+  } catch (error) {
+    console.error('[SW] Failed to initialize user ID:', error);
+  }
 }
 
-// Initialize auth when service worker starts
-initializeAuth();
+// Initialize on startup
+initializeUserId();
 
 interface PriceData {
   country: 'BE' | 'NL' | 'FR' | 'DE';
@@ -170,7 +138,7 @@ async function fetchStoreAvailability(
       return null;
     }
 
-    const data = await response.json();
+    const data: { availabilities?: Array<{ classUnitKey?: { classUnitCode?: string }; buyingOption?: { cashCarry?: { availability?: unknown; restocks?: unknown } } }> } = await response.json();
 
     console.log(
       `[${country}] Got ${data.availabilities?.length || 0} store results`
@@ -179,7 +147,7 @@ async function fetchStoreAvailability(
     // Find availability for our specific store
     // Response structure: { availabilities: [ { classUnitKey: { classUnitCode }, buyingOption: { ... } } ] }
     const storeAvailability = data.availabilities?.find(
-      (avail: any) => avail.classUnitKey?.classUnitCode === buCode
+      (avail) => avail.classUnitKey?.classUnitCode === buCode
     );
 
     if (!storeAvailability) {
@@ -192,22 +160,24 @@ async function fetchStoreAvailability(
     console.log(`[${country}] Found store ${buCode} data:`, storeAvailability);
 
     // Extract quantity from cashCarry availability
-    const cashCarryAvailability =
-      storeAvailability.buyingOption?.cashCarry?.availability;
+    const cashCarryAvailability = storeAvailability.buyingOption?.cashCarry?.availability as {
+      quantity?: string;
+      probability?: { thisDay?: { messageType?: string } };
+    } | undefined;
     let quantity = 0;
     let available = false;
     let stockLevel: StoreAvailability['cashCarry']['stockLevel'] = 'UNKNOWN';
     let restockDate: string | undefined;
 
     if (cashCarryAvailability) {
-      quantity = parseInt(cashCarryAvailability.quantity) || 0;
+      quantity = parseInt(cashCarryAvailability.quantity || '0') || 0;
       available = quantity > 0;
 
       // Get stock level from IKEA's probability message type
       const messageType =
         cashCarryAvailability.probability?.thisDay?.messageType;
       if (messageType) {
-        stockLevel = messageType as any; // IKEA uses: HIGH_IN_STOCK, MEDIUM_IN_STOCK, LOW_IN_STOCK, OUT_OF_STOCK
+        stockLevel = messageType as StoreAvailability['cashCarry']['stockLevel']; // IKEA uses: HIGH_IN_STOCK, MEDIUM_IN_STOCK, LOW_IN_STOCK, OUT_OF_STOCK
       } else {
         // Fallback: determine stock level based on quantity
         if (quantity === 0) {
@@ -261,16 +231,13 @@ async function fetchStoreAvailability(
 }
 
 /**
- * Track product view in Firebase analytics and add to history
+ * Track product view and add to history (Chrome Storage)
  */
 async function trackProductView(
   productId: string,
   prices: Record<string, PriceData>
 ): Promise<void> {
   try {
-    // Ensure auth is initialized
-    await initializeAuth();
-
     // Get product name and image from any available country
     const firstAvailablePrice = Object.values(prices).find((p) => p !== null);
     const productName = firstAvailablePrice?.name || `Product ${productId}`;
@@ -278,97 +245,32 @@ async function trackProductView(
 
     // Calculate cheapest country and price
     const availablePrices = Object.entries(prices)
-      .filter(([_, data]) => data !== null)
-      .map(([country, data]) => ({ country, price: data!.price }));
+      .filter((entry): entry is [string, PriceData] => entry[1] !== null)
+      .map(([country, data]) => ({ country, price: data.price }));
 
     let cheapestCountry: 'BE' | 'NL' | 'FR' | 'DE' | undefined;
     let cheapestPrice: number | undefined;
-    let cheapestCountries: ('BE' | 'NL' | 'FR' | 'DE')[] | null = null;
 
     if (availablePrices.length > 0) {
       const minPrice = Math.min(...availablePrices.map((p) => p.price));
-      cheapestCountries = availablePrices
-        .filter((p) => p.price === minPrice)
-        .map((p) => p.country as 'BE' | 'NL' | 'FR' | 'DE');
-      cheapestCountry = cheapestCountries[0];
+      const cheapestItems = availablePrices.filter((p) => p.price === minPrice);
+      cheapestCountry = cheapestItems[0].country as 'BE' | 'NL' | 'FR' | 'DE';
       cheapestPrice = minPrice;
     }
 
-    // Convert prices to ProductComparisonResult format
-    const comparisonResult = {
+    // Add to Chrome Storage history
+    await ChromeStorage.addToHistory({
       productId,
-      cheapest: cheapestCountries,
-      products: {
-        belgium: prices['BE']
-          ? {
-              productId,
-              price: prices['BE'].price,
-              name: productName,
-              imageUrl: productImage,
-              currency: prices['BE'].currency,
-              available: prices['BE'].available,
-              country: 'BE' as const,
-              url: prices['BE'].url,
-            }
-          : null,
-        netherlands: prices['NL']
-          ? {
-              productId,
-              price: prices['NL'].price,
-              name: productName,
-              imageUrl: productImage,
-              currency: prices['NL'].currency,
-              available: prices['NL'].available,
-              country: 'NL' as const,
-              url: prices['NL'].url,
-            }
-          : null,
-        france: prices['FR']
-          ? {
-              productId,
-              price: prices['FR'].price,
-              name: productName,
-              imageUrl: productImage,
-              currency: prices['FR'].currency,
-              available: prices['FR'].available,
-              country: 'FR' as const,
-              url: prices['FR'].url,
-            }
-          : null,
-        germany: prices['DE']
-          ? {
-              productId,
-              price: prices['DE'].price,
-              name: productName,
-              imageUrl: productImage,
-              currency: prices['DE'].currency,
-              available: prices['DE'].available,
-              country: 'DE' as const,
-              url: prices['DE'].url,
-            }
-          : null,
-      },
-    };
+      name: productName,
+      imageUrl: productImage,
+      searchedAt: new Date().toISOString(),
+      cheapestCountry,
+      cheapestPrice,
+    });
 
-    // Track in Firebase (pass the extension's db instance)
-    await trackProductComparison(comparisonResult, db || undefined);
-    console.log('[Firebase SW] Tracked product comparison:', productId);
-
-    // Add to history
-    await addToHistory(
-      {
-        productId,
-        name: productName,
-        imageUrl: productImage,
-        cheapestCountry,
-        cheapestPrice,
-      },
-      db || undefined,
-      auth || undefined
-    );
-    console.log('[Firebase SW] Added to history:', productId);
+    console.log('[SW] Added to history:', productId);
   } catch (error) {
-    console.error('[Firebase SW] Failed to track product view:', error);
+    console.error('[SW] Failed to track product view:', error);
     // Don't throw - tracking failure shouldn't break the extension
   }
 }
@@ -390,12 +292,8 @@ async function fetchAllPrices(
     `[Background] Fetching prices and availability for product ${productId} from all countries`
   );
 
-  // Ensure auth is initialized before fetching store preferences
-  await initializeAuth();
-  console.log('[Background] Auth state after init:', {
-    currentUser: auth?.currentUser?.uid,
-    isInitialized: isAuthInitialized,
-  });
+  // Ensure user ID is initialized
+  await initializeUserId();
 
   // First, fetch all prices
   const priceResults = await Promise.all(
@@ -418,19 +316,25 @@ async function fetchAllPrices(
     if (!prices[country]) return; // Skip if no price data
 
     try {
-      const selectedStore = await getSelectedStore(country, db || undefined, auth || undefined);
-      if (!selectedStore) {
+      // Get selected store buCode from Chrome Storage
+      const buCode = await ChromeStorage.getSelectedStoreCode(country);
+      if (!buCode) {
         console.log(`[${country}] No store selected, skipping availability`);
         return;
       }
 
+      // Get store details
+      const stores = getStoresByCountry(country);
+      const selectedStore = stores.find((s) => s.buCode === buCode);
+      const storeName = selectedStore?.name || `Store ${buCode}`;
+
       console.log(
-        `[${country}] Fetching availability for store ${selectedStore.buCode} (${selectedStore.name})`
+        `[${country}] Fetching availability for store ${buCode} (${storeName})`
       );
       const availability = await fetchStoreAvailability(
         country,
         productId,
-        selectedStore.buCode
+        buCode
       );
 
       if (availability) {

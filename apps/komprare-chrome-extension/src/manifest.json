@@ -36,10 +36,7 @@
   "permissions": ["storage"],
   "host_permissions": [
     "https://www.ikea.com/*",
-    "https://api.ingka.ikea.com/*",
-    "https://*.firebaseio.com/*",
-    "https://*.googleapis.com/*",
-    "https://firestore.googleapis.com/*"
+    "https://api.ingka.ikea.com/*"
   ],
   "web_accessible_resources": [
     {
