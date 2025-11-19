@@ -31,6 +31,8 @@ interface PriceData {
   name?: string;
   imageUrl?: string;
   storeAvailability?: StoreAvailability;
+  isCombination?: boolean;
+  subproducts?: string[];
 }
 
 interface FetchPricesMessage {
@@ -94,12 +96,169 @@ async function fetchProductData(
       url: result.url,
       name: result.name,
       imageUrl: result.imageUrl,
+      isCombination: result.isCombination,
+      subproducts: result.subproducts,
     };
   } catch (error) {
     console.error(`[${country}] Error fetching product data:`, error);
     return null;
   }
 }
+
+/**
+ * Fetch and combine prices for combination products
+ * Fetches each sub-product and sums their prices
+ */
+async function fetchCombinationProductPrices(
+  country: keyof typeof COUNTRY_CONFIGS,
+  subproducts: string[]
+): Promise<{ price: number; currency: string; available: boolean } | null> {
+  try {
+    console.log(`[${country}] Fetching ${subproducts.length} sub-products for combination product`);
+
+    // Fetch all sub-products in parallel
+    const subproductPromises = subproducts.map((subId) =>
+      scrapeIkeaProduct(country, subId)
+    );
+    const results = await Promise.all(subproductPromises);
+
+    // Calculate total price
+    let totalPrice = 0;
+    let currency = 'EUR';
+    let allAvailable = true;
+
+    for (let i = 0; i < results.length; i++) {
+      const result = results[i];
+      const subId = subproducts[i];
+
+      if (isScraperError(result)) {
+        console.error(`[${country}] Failed to fetch sub-product ${subId}:`, result.message);
+        return null;
+      }
+
+      totalPrice += result.price;
+      currency = result.currency;
+
+      // Product is only available if ALL sub-products are available
+      if (!result.available) {
+        allAvailable = false;
+      }
+
+      console.log(`[${country}] Sub-product ${subId}: €${result.price} (${result.available ? 'available' : 'unavailable'})`);
+    }
+
+    console.log(`[${country}] Combined price: €${totalPrice} (${allAvailable ? 'all available' : 'some unavailable'})`);
+
+    return {
+      price: totalPrice,
+      currency,
+      available: allAvailable,
+    };
+  } catch (error) {
+    console.error(`[${country}] Error fetching combination product prices:`, error);
+    return null;
+  }
+}
+
+/**
+ * NOTE: This function is currently unused as stock fetching for combination products
+ * has been disabled due to API reliability issues. Users are directed to check
+ * individual product pages instead.
+ *
+ * Fetch combined store availability for combination products
+ * Returns the minimum availability across all sub-products
+ */
+/*
+async function fetchCombinationStoreAvailability(
+  country: keyof typeof COUNTRY_CONFIGS,
+  subproducts: string[],
+  buCode: string
+): Promise<StoreAvailability | null> {
+  try {
+    console.log(`[${country}] Fetching availability for ${subproducts.length} sub-products at store ${buCode}`);
+
+    // Fetch availability for all sub-products in parallel
+    const availabilityPromises = subproducts.map((subId) =>
+      fetchStoreAvailability(country, subId, buCode)
+    );
+    const results = await Promise.all(availabilityPromises);
+
+    // Filter out null results
+    const validResults = results.filter((r): r is StoreAvailability => r !== null);
+
+    if (validResults.length === 0) {
+      console.error(`[${country}] Failed to fetch availability for all sub-products`);
+      return null;
+    }
+
+    if (validResults.length < subproducts.length) {
+      console.warn(`[${country}] Only got ${validResults.length}/${subproducts.length} sub-product availabilities`);
+    }
+
+    // Calculate minimum stock across all sub-products
+    const minCashCarryQuantity = Math.min(...validResults.map((r) => r.cashCarry.quantity));
+    const minClickCollectQuantity = Math.min(...validResults.map((r) => r.clickCollect.quantity));
+
+    // Determine most restrictive stock level for cash & carry
+    const stockLevelPriority = {
+      'OUT_OF_STOCK': 0,
+      'LOW_IN_STOCK': 1,
+      'MEDIUM_IN_STOCK': 2,
+      'HIGH_IN_STOCK': 3,
+      'UNKNOWN': 4,
+    };
+
+    const mostRestrictiveCashCarry = validResults.reduce((min, curr) => {
+      const minPriority = stockLevelPriority[min.cashCarry.stockLevel];
+      const currPriority = stockLevelPriority[curr.cashCarry.stockLevel];
+      return currPriority < minPriority ? curr : min;
+    });
+
+    const mostRestrictiveClickCollect = validResults.reduce((min, curr) => {
+      const minPriority = stockLevelPriority[min.clickCollect.stockLevel];
+      const currPriority = stockLevelPriority[curr.clickCollect.stockLevel];
+      return currPriority < minPriority ? curr : min;
+    });
+
+    // Find earliest restock date if any sub-product needs restocking
+    const restockDates = validResults
+      .map((r) => r.cashCarry.restockDate)
+      .filter((date): date is string => date !== undefined)
+      .sort();
+    const earliestRestockDate = restockDates.length > 0 ? restockDates[0] : undefined;
+
+    // Get the highest restock quantity (most optimistic)
+    const restockQuantities = validResults
+      .map((r) => r.cashCarry.restockQuantity)
+      .filter((qty): qty is number => qty !== undefined);
+    const maxRestockQuantity = restockQuantities.length > 0 ? Math.max(...restockQuantities) : undefined;
+
+    const combinedAvailability: StoreAvailability = {
+      buCode: validResults[0].buCode,
+      storeName: validResults[0].storeName,
+      cashCarry: {
+        quantity: minCashCarryQuantity,
+        available: minCashCarryQuantity > 0,
+        stockLevel: mostRestrictiveCashCarry.cashCarry.stockLevel,
+        restockDate: earliestRestockDate,
+        restockQuantity: maxRestockQuantity,
+      },
+      clickCollect: {
+        quantity: minClickCollectQuantity,
+        available: minClickCollectQuantity > 0,
+        stockLevel: mostRestrictiveClickCollect.clickCollect.stockLevel,
+      },
+      lastUpdated: new Date().toISOString(),
+    };
+
+    console.log(`[${country}] Combined availability: ${minCashCarryQuantity} units (${combinedAvailability.cashCarry.stockLevel})`);
+    return combinedAvailability;
+  } catch (error) {
+    console.error(`[${country}] Error fetching combination availability:`, error);
+    return null;
+  }
+}
+*/
 
 /**
  * Fetch store availability from IKEA API for a specific product and store
@@ -151,10 +310,26 @@ async function fetchStoreAvailability(
     );
 
     if (!storeAvailability) {
-      console.error(
-        `[${country}] Store ${buCode} not found in availability results`
+      console.warn(
+        `[${country}] Store ${buCode} not found in availability results - treating as out of stock`
       );
-      return null;
+      // Return out of stock availability instead of null
+      // This allows combination products to still show stock (as 0)
+      return {
+        buCode: buCode,
+        storeName: storeName,
+        cashCarry: {
+          quantity: 0,
+          available: false,
+          stockLevel: 'OUT_OF_STOCK',
+        },
+        clickCollect: {
+          quantity: 0,
+          available: false,
+          stockLevel: 'OUT_OF_STOCK',
+        },
+        lastUpdated: new Date().toISOString(),
+      };
     }
 
     console.log(`[${country}] Found store ${buCode} data:`, storeAvailability);
@@ -295,9 +470,51 @@ async function fetchAllPrices(
   // Ensure user ID is initialized
   await initializeUserId();
 
-  // First, fetch all prices
+  // First, fetch from one country to check if it's a combination product
+  console.log(`[Background] Checking if ${productId} is a combination product...`);
+  const firstResult = await scrapeIkeaProduct('BE', productId);
+
+  let isCombinationProduct = false;
+  let subproducts: string[] | undefined;
+
+  if (!isScraperError(firstResult) && firstResult.isCombination && firstResult.subproducts) {
+    isCombinationProduct = true;
+    subproducts = firstResult.subproducts;
+    console.log(`[Background] Detected combination product with ${subproducts.length} sub-products:`, subproducts);
+  } else {
+    console.log(`[Background] Product ${productId} is a standard product (not combination)`);
+  }
+
+  console.log(`[Background] isCombinationProduct=${isCombinationProduct}, subproducts=`, subproducts);
+
+  // Fetch prices based on product type
   const priceResults = await Promise.all(
-    countries.map((country) => fetchProductData(country, productId))
+    countries.map(async (country) => {
+      if (isCombinationProduct && subproducts) {
+        // For combination products, fetch and sum sub-product prices
+        const combinedResult = await fetchCombinationProductPrices(country, subproducts);
+        if (!combinedResult) return null;
+
+        // Get product details from the main product page
+        const mainProduct = await scrapeIkeaProduct(country, productId);
+        if (isScraperError(mainProduct)) return null;
+
+        return {
+          country,
+          price: combinedResult.price,
+          currency: combinedResult.currency,
+          available: combinedResult.available,
+          url: mainProduct.url,
+          name: mainProduct.name,
+          imageUrl: mainProduct.imageUrl,
+          isCombination: true,
+          subproducts: subproducts,
+        };
+      } else {
+        // For standard products, use existing logic
+        return fetchProductData(country, productId);
+      }
+    })
   );
 
   const prices: Record<string, PriceData> = {};
@@ -331,6 +548,15 @@ async function fetchAllPrices(
       console.log(
         `[${country}] Fetching availability for store ${buCode} (${storeName})`
       );
+
+      // Skip availability for combination products - not reliable
+      if (isCombinationProduct) {
+        console.log(`[${country}] Skipping availability for combination product - users should check individual product pages`);
+        return;
+      }
+
+      // Fetch standard availability for single product
+      console.log(`[${country}] → Fetching standard availability for product ${productId}`);
       const availability = await fetchStoreAvailability(
         country,
         productId,
@@ -338,7 +564,10 @@ async function fetchAllPrices(
       );
 
       if (availability) {
+        console.log(`[${country}] ✓ Successfully fetched availability:`, availability.cashCarry.stockLevel);
         prices[country].storeAvailability = availability;
+      } else {
+        console.log(`[${country}] ✗ Failed to fetch availability (returned null)`);
       }
     } catch (error) {
       console.error(`[${country}] Failed to fetch availability:`, error);

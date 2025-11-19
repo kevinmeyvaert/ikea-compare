@@ -1,6 +1,8 @@
 // Content script for IKEA Price Compare Extension
 // Injects price comparison widget on IKEA product pages
 
+import type { ProductIdInfo } from '@ikea-compare/types';
+
 interface StoreAvailability {
   buCode: string;
   storeName: string;
@@ -36,6 +38,8 @@ interface PriceData {
   available: boolean;
   url: string;
   storeAvailability?: StoreAvailability;
+  isCombination?: boolean;
+  subproducts?: string[];
 }
 
 interface FetchPricesResponse {
@@ -59,13 +63,22 @@ const COUNTRY_FLAGS: Record<string, string> = {
 };
 
 /**
- * Extract product ID from IKEA URL
- * URL format: https://www.ikea.com/be/nl/p/billy-bookcase-white-00263850/
+ * Extract product ID from IKEA URL and detect if it's a combination product
+ * URL formats:
+ * - Standard: https://www.ikea.com/be/nl/p/billy-bookcase-white-00263850/
+ * - Combination: https://www.ikea.com/be/nl/p/tossberg-malskaer-bureaustoel-gunnared-beige-wit-s79508232/
  */
-function extractProductId(): string | null {
-  const urlMatch = window.location.pathname.match(/\/p\/[^/]+-(\d{8})\/?$/);
+function extractProductId(): ProductIdInfo | null {
+  // Match both standard (8 digits) and combination products (s + 8 digits)
+  const urlMatch = window.location.pathname.match(/\/p\/[^/]+-(s?\d{8})\/?$/i);
   if (urlMatch) {
-    return urlMatch[1];
+    const productId = urlMatch[1];
+    // Combination products start with 's' or 'S'
+    const isCombination = productId.toLowerCase().startsWith('s');
+    return {
+      id: productId,
+      isCombination,
+    };
   }
   return null;
 }
@@ -144,6 +157,46 @@ function createPriceTable(prices: Record<string, PriceData>): HTMLElement {
   `;
   container.appendChild(header);
 
+  // Check if any price data indicates this is a combination product
+  const isCombinationProduct = Object.values(prices).some((p) => p?.isCombination);
+
+  // Get subproduct count for display
+  const firstCombinationPrice = Object.values(prices).find((p) => p?.isCombination);
+  const subproductCount = firstCombinationPrice?.subproducts?.length;
+
+  // Show combination product indicator
+  if (isCombinationProduct) {
+    const combinationBanner = document.createElement('div');
+    combinationBanner.style.cssText = `
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border-bottom: 3px solid #f59e0b;
+      border-top: 3px solid #f59e0b;
+      padding: 12px 16px;
+      text-align: center;
+    `;
+    const subproductText = subproductCount ? ` (${subproductCount} onderdelen)` : '';
+    combinationBanner.innerHTML = `
+      <div style="
+        display: inline-block;
+        background: #f59e0b;
+        color: white;
+        padding: 6px 16px;
+        border-radius: 16px;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      ">
+        🔗 COMBINATIEPRODUCT${subproductText}
+      </div>
+      <p style="margin: 0; font-size: 12px; color: #92400e; font-weight: 600;">
+        Prijs is de som van alle onderdelen
+      </p>
+    `;
+    container.appendChild(combinationBanner);
+  }
+
   // Price rows (vertical list)
   const countries: Array<keyof typeof COUNTRY_FLAGS> = [
     'BE',
@@ -187,7 +240,18 @@ function createPriceTable(prices: Record<string, PriceData>): HTMLElement {
     let storeName = COUNTRY_NAMES[country]; // Fallback to country name
     let availabilityHTML = '';
 
-    if (priceData.storeAvailability) {
+    // Skip stock display entirely for combination products
+    if (priceData.isCombination) {
+      availabilityHTML = `
+        <div style="margin-top: 4px; font-size: 11px; color: #92400e; font-weight: 500;">
+          ℹ️ Voorraad niet beschikbaar
+        </div>
+        <div style="font-size: 10px; color: #92400e; font-style: italic; margin-top: 2px;">
+          Bekijk afzonderlijke producten
+        </div>
+      `;
+    } else if (priceData.storeAvailability) {
+      // Show stock for standard products only
       const avail = priceData.storeAvailability;
       storeName = avail.storeName || `Store ${avail.buCode}`;
       const quantity = avail.cashCarry.quantity;
@@ -233,6 +297,7 @@ function createPriceTable(prices: Record<string, PriceData>): HTMLElement {
         `;
       }
     } else {
+      // No availability data for standard products
       availabilityHTML = `
         <div style="margin-top: 4px; font-size: 11px; color: #9ca3af; font-style: italic;">
           ℹ️ Open popup om winkel te selecteren
@@ -404,13 +469,15 @@ async function main() {
   console.log('[KOMPRÅRE] Content script geladen');
 
   // Extract product ID from URL
-  const productId = extractProductId();
-  if (!productId) {
+  const productIdInfo = extractProductId();
+  if (!productIdInfo) {
     console.log('[KOMPRÅRE] Kon product ID niet uit URL halen');
     return;
   }
 
-  console.log(`[KOMPRÅRE] Product ID gedetecteerd: ${productId}`);
+  console.log(
+    `[KOMPRÅRE] Product ID gedetecteerd: ${productIdInfo.id} (combinatie: ${productIdInfo.isCombination})`
+  );
 
   // Wait for page to load
   if (document.readyState === 'loading') {
@@ -421,17 +488,19 @@ async function main() {
 
   // Create and inject widget
   const widget = createWidget();
-  widget.appendChild(createLoadingState());
   document.body.appendChild(widget);
 
+  // Show loading state
+  widget.appendChild(createLoadingState());
+
   // Initial load
-  await updateWidget(productId);
+  await updateWidget(productIdInfo.id);
 
   // Listen for store preference updates
-  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message.type === 'STORE_PREFERENCES_UPDATED') {
       console.log('[KOMPRÅRE] Store preferences updated, refreshing widget...');
-      updateWidget(productId)
+      updateWidget(productIdInfo.id)
         .then(() => {
           sendResponse({ success: true });
         })

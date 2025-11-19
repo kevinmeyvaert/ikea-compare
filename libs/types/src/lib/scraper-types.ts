@@ -10,6 +10,8 @@ export interface ProductData {
   country: 'BE' | 'NL' | 'FR' | 'DE';
   url: string;
   storeAvailability?: StoreAvailability; // Store-specific availability data
+  subproducts?: string[]; // Array of sub-product IDs for combination products
+  isCombination?: boolean; // Whether this is a combination product
 }
 
 export interface ProductComparisonResult {
@@ -28,4 +30,9 @@ export interface ScraperError {
   country: string;
   message: string;
   productId: string;
+}
+
+export interface ProductIdInfo {
+  id: string;
+  isCombination: boolean;
 }

@@ -39,6 +39,19 @@ function buildProductUrl(
 }
 
 /**
+ * Extracts sub-product IDs from utag_data
+ */
+function extractSubproductIds(productData: any): string[] | undefined {
+  if (productData?.subproducts) {
+    const subproductsStr = String(productData.subproducts);
+    // Split by comma and filter out empty strings
+    const ids = subproductsStr.split(',').map(id => id.trim()).filter(id => id.length === 8);
+    return ids.length > 0 ? ids : undefined;
+  }
+  return undefined;
+}
+
+/**
  * Extracts product data from IKEA product page HTML
  */
 function extractProductData(
@@ -174,7 +187,11 @@ function extractProductData(
       return null;
     }
 
-    const result = {
+    // Extract sub-product IDs if this is a combination product
+    const subproducts = extractSubproductIds(productData);
+    const isCombination = productId.toLowerCase().startsWith('s') || (subproducts && subproducts.length > 0);
+
+    const result: ProductData = {
       productId,
       name,
       price,
@@ -183,9 +200,18 @@ function extractProductData(
       available,
       country,
       url: buildProductUrl(country, productId),
+      ...(subproducts && { subproducts }),
+      ...(isCombination && { isCombination }),
     };
 
-    console.log(`[${country}] Successfully extracted:`, { name, price, currency, available });
+    console.log(`[${country}] Successfully extracted:`, {
+      name,
+      price,
+      currency,
+      available,
+      isCombination,
+      subproducts: subproducts?.length || 0
+    });
     return result;
   } catch (error) {
     console.error(`Error extracting data for ${country}:`, error);
