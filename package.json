@@ -10,6 +10,7 @@
   "private": true,
   "dependencies": {
     "firebase": "^12.5.0",
+    "html5-qrcode": "^2.3.8",
     "next": "~15.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
